@@ -3,7 +3,7 @@
   "contentType": "Library",
   "majorVersion": 1,
   "minorVersion": 0,
-  "patchVersion": 0,
+  "patchVersion": 1,
   "runnable": 1,
   "fullscreen": 1,
   "embedTypes": [
@@ -33,12 +33,17 @@
       "minorVersion": 5
     },
     {
-      "machineName": "H5P.JoubelUI",
+      "machineName": "H5P.JoubelUICFRD",
       "majorVersion": 1,
-      "minorVersion": 3
+      "minorVersion": 0
     },
     {
       "machineName": "H5P.FontIcons",
+      "majorVersion": 1,
+      "minorVersion": 0
+    },
+    {
+      "machineName": "H5P.Instructions",
       "majorVersion": 1,
       "minorVersion": 0
     }
@@ -53,6 +58,11 @@
       "machineName": "H5PEditor.ShowWhen",
       "majorVersion": 1,
       "minorVersion": 0
+    },
+    {
+      "machineName": "H5PEditor.ColorSelector",
+      "majorVersion": 1,
+      "minorVersion": 3
     },
     {
       "machineName": "H5PEditor.CoursePresentationCFRD",

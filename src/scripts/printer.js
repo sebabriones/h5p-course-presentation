@@ -136,7 +136,7 @@ const Printer = (function ($) {
       html: texts.printIngress
     }));
 
-    H5P.JoubelUI.createButton({
+    H5P.JoubelUICFRD.createButton({
       html: texts.printAllSlides,
       'class': 'h5p-cp-print-all-slides',
       click: function () {
@@ -145,7 +145,7 @@ const Printer = (function ($) {
       }
     }).appendTo($content);
 
-    H5P.JoubelUI.createButton({
+    H5P.JoubelUICFRD.createButton({
       html: texts.printCurrentSlide,
       'class': 'h5p-cp-print-current-slide',
       click: function () {

@@ -27,6 +27,7 @@ let CoursePresentation = function (params, id, extras) {
   this.presentation = params.presentation;
   this.slides = this.presentation.slides;
   this.contentId = id;
+  this.instructions = params.instructions;
   this.elementInstances = []; // elementInstances holds the instances for elements in an array.
   this.elementsAttached = []; // Map to keep track of which slide has attached elements
   this.slidesWithSolutions = [];
@@ -160,6 +161,78 @@ CoursePresentation.prototype = Object.create(Parent.prototype);
 CoursePresentation.prototype.constructor = CoursePresentation;
 
 /**
+ * Build options for H5P.Instructions from content params.
+ *
+ * @private
+ * @returns {object|null}
+ */
+CoursePresentation.prototype.getInstructionsOptions = function () {
+  var instructions = this.instructions;
+  if (!instructions || !instructions.enabled) {
+    return null;
+  }
+
+  var text = (instructions.text === undefined || instructions.text === null) ?
+    '' :
+    String(instructions.text).trim();
+  if (!text) {
+    return null;
+  }
+
+  return {
+    text: text,
+    displayMode: instructions.displayMode || 'both',
+    introButtonLabel: instructions.introButtonLabel || 'Start',
+    tabButtonLabel: instructions.tabButtonLabel || 'Instructions',
+    appearance: $.extend(true, {}, instructions.appearance || {}),
+    animation: $.extend(true, {}, instructions.animation || {}),
+    startCollapsed: instructions.startCollapsed === undefined ?
+      true :
+      !!instructions.startCollapsed
+  };
+};
+
+/**
+ * Mount Instructions on the activity container (once).
+ */
+CoursePresentation.prototype.attachInstructions = function () {
+  var that = this;
+  var tryAttach = function () {
+    var options = that.getInstructionsOptions();
+    var $target = that.$container;
+    if (!options || !$target || !$target.length) {
+      return;
+    }
+    if (
+      $target.find('.h5p-instructions-root').length ||
+      ($target.parent().length && $target.parent().children('.h5p-instructions-root').length)
+    ) {
+      return;
+    }
+    if (H5P.Instructions && typeof H5P.Instructions.attach === 'function') {
+      H5P.Instructions.attach($target, options);
+    }
+  };
+
+  // Defer so layout/CSS of the CP wrapper is ready.
+  setTimeout(tryAttach, 0);
+};
+
+/**
+ * Keep Instructions scale in sync with CP resize.
+ */
+CoursePresentation.prototype.refreshInstructionsScale = function () {
+  var options = this.getInstructionsOptions();
+  var $target = this.$container;
+  if (!options || !$target || !$target.length) {
+    return;
+  }
+  if (H5P.Instructions && typeof H5P.Instructions.updateScale === 'function') {
+    H5P.Instructions.updateScale($target, options);
+  }
+};
+
+/**
  * @public
  * @return {object}
  */
@@ -249,6 +322,11 @@ CoursePresentation.prototype.attach = function ($container) {
   this.$fullscreenAnnouncer = $container.find('.h5p-fullscreen-announcer');
   this.$slideTop = this.$slideAnnouncer.next();
   this.$wrapper = $container.children('.h5p-wrapper');
+
+  // Instructions (player only — skip inside the CP editor canvas)
+  if (this.editor === undefined) {
+    this.attachInstructions();
+  }
 
   if (this.activeSurface) {
     this.$wrapper.addClass('h5p-course-presentation-active-surface');
@@ -798,6 +876,7 @@ CoursePresentation.prototype.resize = function () {
   }
 
   this.fitCT();
+  this.refreshInstructionsScale();
 };
 
 /**
