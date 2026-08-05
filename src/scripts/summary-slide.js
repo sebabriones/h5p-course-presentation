@@ -1,11 +1,11 @@
-import { jQuery as $, JoubelUI } from './globals';
+﻿import { jQuery as $, JoubelUI } from './globals';
 import { addClickAndKeyboardListeners } from './utils';
 
 const SummarySlide = (function () {
 
   /**
    * Constructor for summary slide
-   * @param {H5P.CoursePresentation} coursePresentation Course presentation parent of summary slide
+   * @param {H5P.CoursePresentationCFRD} coursePresentation Course presentation parent of summary slide
    * @param {$} $summarySlide Summary slide element
    * @constructor
    */

@@ -1,16 +1,16 @@
 {
-  "title": "Course Presentation",
+  "title": "Course Presentation (CFRD)",
   "contentType": "Library",
   "majorVersion": 1,
-  "minorVersion": 26,
-  "patchVersion": 3,
+  "minorVersion": 0,
+  "patchVersion": 0,
   "runnable": 1,
   "fullscreen": 1,
   "embedTypes": [
     "iframe"
   ],
-  "machineName": "H5P.CoursePresentation",
-  "author": "Joubel",
+  "machineName": "H5P.CoursePresentationCFRD",
+  "author": "CFRD-UDEC",
   "license": "MIT",
   "coreApi": {
     "majorVersion": 1,
@@ -18,12 +18,12 @@
   },
   "preloadedJs": [
     {
-      "path": "dist/h5p-course-presentation.js"
+      "path": "dist/h5p-course-presentation-cfrd.js"
     }
   ],
   "preloadedCss": [
     {
-      "path": "dist/h5p-course-presentation.css"
+      "path": "dist/h5p-course-presentation-cfrd.css"
     }
   ],
   "preloadedDependencies": [
@@ -45,9 +45,9 @@
   ],
   "editorDependencies": [
     {
-      "machineName": "H5P.CoursePresentation",
+      "machineName": "H5P.CoursePresentationCFRD",
       "majorVersion": 1,
-      "minorVersion": 26
+      "minorVersion": 0
     },
     {
       "machineName": "H5PEditor.ShowWhen",
@@ -55,9 +55,9 @@
       "minorVersion": 0
     },
     {
-      "machineName": "H5PEditor.CoursePresentation",
+      "machineName": "H5PEditor.CoursePresentationCFRD",
       "majorVersion": 1,
-      "minorVersion": 25
+      "minorVersion": 0
     }
   ]
 }

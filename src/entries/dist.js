@@ -10,4 +10,4 @@ import CoursePresentation from "../scripts/cp";
 // Load library
 H5P = H5P || {};
 H5P.Tooltip = H5P.Tooltip || function () {};
-H5P.CoursePresentation = CoursePresentation;
+H5P.CoursePresentationCFRD = CoursePresentation;
