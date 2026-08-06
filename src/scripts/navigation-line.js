@@ -2,6 +2,7 @@ import Printer from './printer';
 import Controls from 'h5p-lib-controls/src/scripts/controls';
 import UIKeyboard from 'h5p-lib-controls/src/scripts/ui/keyboard';
 import { defaultValue, contains, isFunction, addClickAndKeyboardListeners, isIOS } from './utils';
+import { applyButtonAppearance } from './button-appearance';
 
 /**
  * Enum indicating which state a navigation bar part is in
@@ -59,6 +60,14 @@ const NavigationLine = (function ($) {
               const isAnswered = this.cp.slideHasAnsweredTask(index);
               this.setTaskAnswered(index, isAnswered);
               event.setVerb('answered');
+            }
+
+            // Finish gate only trusts answered (and completed remapped below).
+            if (
+              this.cp.isFinishGateEnabled() &&
+              (shortVerb === 'answered' || shortVerb === 'completed')
+            ) {
+              this.cp.markFinishSlideAnswered(index);
             }
 
             if (event.data.statement.context.extensions === undefined) {
@@ -136,6 +145,14 @@ const NavigationLine = (function ($) {
 
       if (this.isSummarySlide(i)) {
         $li.addClass('progressbar-part-summary-slide');
+
+        if (this.cp.isFinishGateEnabled()) {
+          $li.addClass('h5p-progressbar-part-finish-locked')
+            .attr('aria-disabled', 'true');
+          $link.off('click').on('click', function (event) {
+            event.preventDefault();
+          });
+        }
       }
 
       // Add hover effect if not an ipad or iphone.
@@ -441,6 +458,8 @@ const NavigationLine = (function ($) {
       .removeClass('h5p-progressbar-part-selected')
       .attr('aria-selected', false);
 
+    this.updateDotsChromeBackground(slideNumber);
+
     if (prevSlideNumber === undefined) {
       that.cp.progressbarParts.forEach(function (part, i) {
         that.setTaskAnswered(i, false);
@@ -569,11 +588,160 @@ const NavigationLine = (function ($) {
    */
   NavigationLine.prototype.toggleNextAndPreviousButtonDisabled = function (index) {
     const lastSlideIndex = this.cp.slides.length - 1;
+    let maxReachable = lastSlideIndex;
+
+    // With the Finish gate, Next must stop before the summary slide.
+    if (this.cp.isFinishGateEnabled()) {
+      maxReachable = lastSlideIndex - 1;
+    }
 
     this.cp.$prevSlideButton.attr('aria-disabled', (index === 0).toString());
-    this.cp.$nextSlideButton.attr('aria-disabled', (index === lastSlideIndex).toString());
+    this.cp.$nextSlideButton.attr('aria-disabled', (index >= maxReachable).toString());
     this.cp.$prevSlideButton.attr('tabindex', (index === 0) ? '-1' : '0');
-    this.cp.$nextSlideButton.attr('tabindex', (index === lastSlideIndex) ? '-1' : '0');
+    this.cp.$nextSlideButton.attr('tabindex', (index >= maxReachable) ? '-1' : '0');
+  };
+
+  /**
+   * Apply the compact dots navigation layout and optional Finish gate.
+   */
+  NavigationLine.prototype.setupDotsNavigation = function () {
+    if (!this.cp.isDotsNavigationEnabled()) {
+      return;
+    }
+
+    const appearance = this.cp.navigationAppearance;
+    const $navigation = this.cp.$wrapper.children('.h5p-cp-navigation');
+    const $progressbar = this.cp.$progressbar;
+
+    this.cp.$container.addClass('h5p-course-presentation-dots-nav');
+
+    const align = appearance.barAlignment === 'left' ? 'flex-start' :
+      (appearance.barAlignment === 'right' ? 'flex-end' : 'center');
+    const style = $navigation.get(0).style;
+    style.setProperty('--h5p-cp-dots-pending', appearance.dotPendingColor || '#999999');
+    style.setProperty('--h5p-cp-dots-answered', appearance.dotAnsweredColor || '#1a73d9');
+    style.setProperty('--h5p-cp-dots-active', appearance.dotActiveColor || '#1356a3');
+    style.setProperty('--h5p-cp-dots-size', (Number(appearance.dotSize) || 0.35) + 'em');
+    style.setProperty('--h5p-cp-dots-width', (Number(appearance.barWidth) || 20) + '%');
+    style.setProperty('--h5p-cp-dots-align', align);
+    style.setProperty('--h5p-cp-arrow-icon', appearance.arrowIconColor || '#1a73d9');
+    style.setProperty('--h5p-cp-arrow-bg', appearance.arrowBackgroundColor || '#e8f0fe');
+    style.setProperty(
+      '--h5p-cp-arrow-radius',
+      (Number.isFinite(Number(appearance.arrowBorderRadius)) ?
+        Number(appearance.arrowBorderRadius) :
+        1) + 'em'
+    );
+
+    this.updateDotsChromeBackground(this.cp.getCurrentSlideIndex());
+
+    this.$dotsNavInner = $('<div/>', {
+      'class': 'h5p-dots-nav-inner'
+    });
+
+    $progressbar.before(this.$dotsNavInner);
+    this.$dotsNavInner.append(this.cp.$prevSlideButton);
+    this.$dotsNavInner.append($progressbar);
+    this.$dotsNavInner.append(this.cp.$nextSlideButton);
+
+    // Ensure every content slide has a visible point, even without a task.
+    this.cp.progressbarParts.forEach(($part, index) => {
+      if (this.isSummarySlide(index)) {
+        return;
+      }
+      if (!$part.find('.h5p-progressbar-part-has-task').length) {
+        $('<div/>', {
+          'class': 'h5p-progressbar-part-has-task h5p-progressbar-part-marker'
+        }).appendTo($part.children('a'));
+      }
+    });
+
+    if (this.cp.isFinishGateEnabled()) {
+      this.$finishButtonContainer = $('<div/>', {
+        'class': 'h5p-finish-btn-container'
+      }).appendTo(this.cp.$boxWrapper);
+
+      this.$finishButton = $('<button/>', {
+        'class': 'h5p-finish-btn',
+        type: 'button',
+        html: appearance.finishButtonLabel || 'Finish'
+      })
+        .on('click', () => this.cp.advanceToSummaryViaFinish())
+        .appendTo(this.$finishButtonContainer);
+
+      applyButtonAppearance(this.$finishButtonContainer, appearance.finishButtonAppearance);
+      this.updateFinishButton();
+
+      // Remove summary slide from keyboard tab order while locked.
+      const summaryIndex = this.cp.slides.length - 1;
+      if (this.cp.progressbarParts[summaryIndex]) {
+        const summaryLink = this.cp.progressbarParts[summaryIndex].children('a').get(0);
+        if (summaryLink) {
+          this.progresbarKeyboardControls.removeElement(summaryLink);
+        }
+      }
+    }
+
+    this.toggleNextAndPreviousButtonDisabled(this.cp.getCurrentSlideIndex());
+  };
+
+  /**
+   * Sync the dots nav/footer background with the slide (or override).
+   *
+   * @param {number} [slideIndex]
+   */
+  NavigationLine.prototype.updateDotsChromeBackground = function (slideIndex) {
+    if (!this.cp.isDotsNavigationEnabled()) {
+      return;
+    }
+
+    const color = this.cp.getDotsChromeBackgroundColor(slideIndex);
+    const $navigation = this.cp.$wrapper.children('.h5p-cp-navigation');
+    if ($navigation.length) {
+      $navigation.css('background-color', color);
+    }
+    if (this.cp.$footer && this.cp.$footer.length) {
+      this.cp.$footer.css('background-color', color);
+    }
+  };
+
+  /**
+   * Show or hide the Finish button according to strict answered progress.
+   */
+  NavigationLine.prototype.updateFinishButton = function () {
+    if (!this.$finishButton || !this.$finishButton.length) {
+      return;
+    }
+
+    const ready = this.cp.areAllFinishSlidesAnswered();
+    this.$finishButton.css('visibility', ready ? 'visible' : 'hidden');
+    this.$finishButton.attr('aria-hidden', ready ? 'false' : 'true');
+  };
+
+  /**
+   * Hide the dots bar once the learner reaches the summary via Finish.
+   */
+  NavigationLine.prototype.hideDotsNavigationOnSummary = function () {
+    if (!this.cp.isDotsNavigationEnabled()) {
+      return;
+    }
+
+    this.cp.$wrapper.children('.h5p-cp-navigation').css('visibility', 'hidden');
+    if (this.$finishButton) {
+      this.$finishButton.css('visibility', 'hidden');
+    }
+  };
+
+  /**
+   * Restore the dots bar after resetTask.
+   */
+  NavigationLine.prototype.showDotsNavigation = function () {
+    if (!this.cp.isDotsNavigationEnabled()) {
+      return;
+    }
+
+    this.cp.$wrapper.children('.h5p-cp-navigation').css('visibility', '');
+    this.updateFinishButton();
   };
 
   /**

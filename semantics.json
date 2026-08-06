@@ -925,6 +925,1106 @@
     ]
   },
   {
+    "name": "levelMode",
+    "type": "group",
+    "label": "Level mode",
+    "description": "Restricts progression so each slide works as a level with exactly one scored activity.",
+    "importance": "high",
+    "optional": true,
+    "fields": [
+      {
+        "name": "enabled",
+        "type": "boolean",
+        "label": "Enable level mode",
+        "description": "Disables free slide navigation and unlocks only the next level. The summary slide remains available at the end.",
+        "default": false
+      },
+      {
+        "name": "criterion",
+        "type": "select",
+        "label": "Progression criterion",
+        "default": "percentage",
+        "options": [
+          {
+            "value": "percentage",
+            "label": "Minimum percentage"
+          },
+          {
+            "value": "score",
+            "label": "Minimum score"
+          },
+          {
+            "value": "attempts",
+            "label": "Successful completion or maximum attempts"
+          }
+        ]
+      },
+      {
+        "name": "minimumPercentage",
+        "type": "number",
+        "label": "Minimum passing percentage",
+        "default": 60,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "%",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "criterion",
+              "equals": "percentage"
+            }
+          ]
+        }
+      },
+      {
+        "name": "minimumScore",
+        "type": "number",
+        "label": "Minimum passing score",
+        "default": 1,
+        "min": 0,
+        "step": 1,
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "criterion",
+              "equals": "score"
+            }
+          ]
+        }
+      },
+      {
+        "name": "maxAttempts",
+        "type": "number",
+        "label": "Maximum attempts",
+        "description": "The next level is unlocked when the activity reports success or this number of attempts is reached.",
+        "default": 3,
+        "min": 1,
+        "step": 1,
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "criterion",
+              "equals": "attempts"
+            }
+          ]
+        }
+      },
+      {
+        "name": "advanceMode",
+        "type": "select",
+        "label": "Advance after meeting the criterion",
+        "default": "button",
+        "options": [
+          {
+            "value": "automatic",
+            "label": "Automatically"
+          },
+          {
+            "value": "button",
+            "label": "With a button"
+          }
+        ]
+      },
+      {
+        "name": "automaticAdvanceDelay",
+        "type": "number",
+        "label": "Automatic advance delay",
+        "description": "Time in milliseconds before advancing to the next level.",
+        "default": 650,
+        "min": 0,
+        "max": 60000,
+        "step": 50,
+        "unit": "ms",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "advanceMode",
+              "equals": "automatic"
+            }
+          ]
+        }
+      },
+      {
+        "name": "nextLevelButtonLabel",
+        "type": "text",
+        "label": "Next level button label",
+        "default": "Advance",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "advanceMode",
+              "equals": "button"
+            }
+          ]
+        }
+      },
+      {
+        "name": "finishButtonLabel",
+        "type": "text",
+        "label": "Final level button label",
+        "default": "Finish",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "advanceMode",
+              "equals": "button"
+            }
+          ]
+        }
+      },
+      {
+        "name": "buttonAlignment",
+        "type": "select",
+        "label": "Button alignment",
+        "default": "center",
+        "options": [
+          {
+            "value": "center",
+            "label": "Center"
+          },
+          {
+            "value": "right",
+            "label": "Right"
+          }
+        ],
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "advanceMode",
+              "equals": "button"
+            }
+          ]
+        }
+      },
+      {
+        "name": "buttonBottomSpacing",
+        "type": "number",
+        "label": "Button bottom spacing",
+        "description": "Distance between the button and the bottom edge.",
+        "default": 0.75,
+        "min": 0,
+        "max": 4,
+        "decimals": 2,
+        "unit": "em",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "advanceMode",
+              "equals": "button"
+            }
+          ]
+        }
+      },
+      {
+        "name": "buttonAppearance",
+        "type": "group",
+        "label": "Advance button appearance",
+        "description": "Style for the Advance and Finish buttons. Border colors apply only when border is enabled.",
+        "importance": "low",
+        "optional": true,
+        "expanded": false,
+        "fields": [
+          {
+            "name": "useGradientBackground",
+            "type": "boolean",
+            "label": "Use gradient background",
+            "default": false
+          },
+          {
+            "name": "backgroundColor",
+            "type": "text",
+            "label": "Button background color",
+            "default": "#1a73d9",
+            "optional": true,
+            "widget": "showWhen",
+            "showWhen": {
+              "widget": "colorSelector",
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": false
+                }
+              ]
+            },
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "gradientBackground",
+            "type": "group",
+            "label": "Gradient background",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "angle",
+                "type": "number",
+                "label": "Gradient angle",
+                "description": "Direction in degrees (0 = upward, 180 = downward).",
+                "default": 180,
+                "min": 0,
+                "max": 360,
+                "step": 1,
+                "unit": "°"
+              },
+              {
+                "name": "colorStart",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient start color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "colorEnd",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient end color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "textColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverBackgroundColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover background color",
+            "default": "#1356a3",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverTextColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "useBorder",
+            "type": "boolean",
+            "label": "Use button border",
+            "default": false
+          },
+          {
+            "name": "borderSettings",
+            "type": "group",
+            "label": "Border settings",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useBorder",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "borderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button border color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "hoverBorderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button hover border color",
+                "default": "#1356a3",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "borderRadius",
+            "type": "number",
+            "label": "Button border radius",
+            "description": "Default is 2em (Joubel UI). Lower values are sharper; higher values are more rounded.",
+            "default": 2,
+            "min": 0,
+            "max": 4,
+            "decimals": 2,
+            "unit": "em"
+          }
+        ]
+      },
+      {
+        "name": "showStatusMessages",
+        "type": "boolean",
+        "label": "Show level status messages",
+        "description": "Shows locked, completed and remaining attempts messages in the level controls.",
+        "default": false
+      },
+      {
+        "name": "levelUnlockedMessage",
+        "type": "text",
+        "label": "Completed level message",
+        "default": "Next level",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "showStatusMessages",
+              "equals": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "levelBlockedMessage",
+        "type": "text",
+        "label": "Locked level message",
+        "default": "Complete the activity to unlock the next level.",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "showStatusMessages",
+              "equals": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "attemptsRemainingMessage",
+        "type": "text",
+        "label": "Remaining attempts message",
+        "description": "Use @attempts for the number of remaining attempts.",
+        "default": "Attempts remaining: @attempts",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "showStatusMessages",
+              "equals": true
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "summaryAppearance",
+    "type": "group",
+    "label": "Summary slide appearance",
+    "description": "Only affects the summary slide of this Course Presentation, not the embedded activities.",
+    "importance": "low",
+    "optional": true,
+    "expanded": false,
+    "fields": [
+      {
+        "name": "slide",
+        "type": "group",
+        "label": "Summary slide colors",
+        "importance": "low",
+        "optional": true,
+        "fields": [
+          {
+            "name": "backgroundColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Summary slide background color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "textColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Summary slide text color",
+            "default": "#323232",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "actionButtons",
+        "type": "group",
+        "label": "Summary action buttons",
+        "description": "Shared style for the Show solutions, Retry and Export text buttons. Border colors apply only when border is enabled.",
+        "importance": "low",
+        "optional": true,
+        "expanded": false,
+        "fields": [
+          {
+            "name": "useGradientBackground",
+            "type": "boolean",
+            "label": "Use gradient background",
+            "default": false
+          },
+          {
+            "name": "backgroundColor",
+            "type": "text",
+            "label": "Button background color",
+            "default": "#1a73d9",
+            "optional": true,
+            "widget": "showWhen",
+            "showWhen": {
+              "widget": "colorSelector",
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": false
+                }
+              ]
+            },
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "gradientBackground",
+            "type": "group",
+            "label": "Gradient background",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "angle",
+                "type": "number",
+                "label": "Gradient angle",
+                "description": "Direction in degrees (0 = upward, 180 = downward).",
+                "default": 180,
+                "min": 0,
+                "max": 360,
+                "step": 1,
+                "unit": "°"
+              },
+              {
+                "name": "colorStart",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient start color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "colorEnd",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient end color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "textColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverBackgroundColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover background color",
+            "default": "#1356a3",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverTextColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "useBorder",
+            "type": "boolean",
+            "label": "Use button border",
+            "default": false
+          },
+          {
+            "name": "borderSettings",
+            "type": "group",
+            "label": "Border settings",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useBorder",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "borderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button border color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "hoverBorderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button hover border color",
+                "default": "#1356a3",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "borderRadius",
+            "type": "number",
+            "label": "Button border radius",
+            "description": "Default is 2em (Joubel UI). Lower values are sharper; higher values are more rounded.",
+            "default": 2,
+            "min": 0,
+            "max": 4,
+            "decimals": 2,
+            "unit": "em"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "navigationAppearance",
+    "type": "group",
+    "label": "Navigation appearance",
+    "description": "Style for the progress bar in normal (non-level) mode. Does not affect embedded activities.",
+    "importance": "medium",
+    "optional": true,
+    "expanded": false,
+    "fields": [
+      {
+        "name": "style",
+        "type": "select",
+        "label": "Navigation style",
+        "description": "Classic keeps the default Course Presentation bar. Dots replaces it with a compact point indicator.",
+        "default": "classic",
+        "options": [
+          {
+            "value": "classic",
+            "label": "Classic"
+          },
+          {
+            "value": "dots",
+            "label": "Dots"
+          }
+        ]
+      },
+      {
+        "name": "barBackgroundColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Override bar and footer background color",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        },
+        "description": "Optional. When empty, the navigation bar and footer use the current slide background color."
+      },
+      {
+        "name": "dotPendingColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Pending dot color",
+        "default": "#999999",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "dotAnsweredColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Answered dot color",
+        "default": "#1a73d9",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "dotActiveColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Active dot color",
+        "default": "#1356a3",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "dotSize",
+        "type": "number",
+        "label": "Dot size",
+        "default": 0.35,
+        "min": 0.2,
+        "max": 1,
+        "decimals": 2,
+        "unit": "em",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        }
+      },
+      {
+        "name": "barWidth",
+        "type": "number",
+        "label": "Bar width",
+        "description": "Width of the dots bar relative to the presentation.",
+        "default": 20,
+        "min": 10,
+        "max": 100,
+        "step": 1,
+        "unit": "%",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        }
+      },
+      {
+        "name": "barAlignment",
+        "type": "select",
+        "label": "Bar alignment",
+        "default": "center",
+        "options": [
+          {
+            "value": "left",
+            "label": "Left"
+          },
+          {
+            "value": "center",
+            "label": "Center"
+          },
+          {
+            "value": "right",
+            "label": "Right"
+          }
+        ],
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        }
+      },
+      {
+        "name": "arrowIconColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Arrow icon color",
+        "default": "#1a73d9",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "arrowBackgroundColor",
+        "type": "text",
+        "widget": "showWhen",
+        "showWhen": {
+          "widget": "colorSelector",
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        },
+        "label": "Arrow background color",
+        "default": "#e8f0fe",
+        "optional": true,
+        "spectrum": {
+          "showInput": true
+        }
+      },
+      {
+        "name": "arrowBorderRadius",
+        "type": "number",
+        "label": "Arrow border radius",
+        "default": 1,
+        "min": 0,
+        "max": 4,
+        "decimals": 2,
+        "unit": "em",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        }
+      },
+      {
+        "name": "finishButtonEnabled",
+        "type": "boolean",
+        "label": "Enable Finish button",
+        "description": "When enabled, the summary slide stays locked until every slide with a task has been answered. Prevents early completed statements. Default is off so free navigation is preserved.",
+        "default": false,
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            }
+          ]
+        }
+      },
+      {
+        "name": "finishButtonLabel",
+        "type": "text",
+        "label": "Finish button label",
+        "default": "Finish",
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "finishButtonEnabled",
+              "equals": true
+            }
+          ]
+        }
+      },
+      {
+        "name": "finishButtonAppearance",
+        "type": "group",
+        "label": "Finish button appearance",
+        "description": "Style for the Finish button that unlocks the summary slide. Border colors apply only when border is enabled.",
+        "importance": "low",
+        "optional": true,
+        "expanded": false,
+        "fields": [
+          {
+            "name": "useGradientBackground",
+            "type": "boolean",
+            "label": "Use gradient background",
+            "default": false
+          },
+          {
+            "name": "backgroundColor",
+            "type": "text",
+            "label": "Button background color",
+            "default": "#1a73d9",
+            "optional": true,
+            "widget": "showWhen",
+            "showWhen": {
+              "widget": "colorSelector",
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": false
+                }
+              ]
+            },
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "gradientBackground",
+            "type": "group",
+            "label": "Gradient background",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useGradientBackground",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "angle",
+                "type": "number",
+                "label": "Gradient angle",
+                "description": "Direction in degrees (0 = upward, 180 = downward).",
+                "default": 180,
+                "min": 0,
+                "max": 360,
+                "step": 1,
+                "unit": "°"
+              },
+              {
+                "name": "colorStart",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient start color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "colorEnd",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Gradient end color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "textColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverBackgroundColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover background color",
+            "default": "#1356a3",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "hoverTextColor",
+            "type": "text",
+            "widget": "colorSelector",
+            "label": "Button hover text color",
+            "default": "#ffffff",
+            "optional": true,
+            "spectrum": {
+              "showInput": true
+            }
+          },
+          {
+            "name": "useBorder",
+            "type": "boolean",
+            "label": "Use button border",
+            "default": false
+          },
+          {
+            "name": "borderSettings",
+            "type": "group",
+            "label": "Border settings",
+            "importance": "low",
+            "widget": "showWhen",
+            "showWhen": {
+              "rules": [
+                {
+                  "field": "useBorder",
+                  "equals": true
+                }
+              ]
+            },
+            "fields": [
+              {
+                "name": "borderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button border color",
+                "default": "#1a73d9",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              },
+              {
+                "name": "hoverBorderColor",
+                "type": "text",
+                "widget": "colorSelector",
+                "label": "Button hover border color",
+                "default": "#1356a3",
+                "optional": true,
+                "spectrum": {
+                  "showInput": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "borderRadius",
+            "type": "number",
+            "label": "Button border radius",
+            "description": "Default is 2em (Joubel UI). Lower values are sharper; higher values are more rounded.",
+            "default": 2,
+            "min": 0,
+            "max": 4,
+            "decimals": 2,
+            "unit": "em"
+          }
+        ],
+        "widget": "showWhen",
+        "showWhen": {
+          "rules": [
+            {
+              "field": "finishButtonEnabled",
+              "equals": true
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "name": "presentation",
     "type": "group",
     "importance": "high",

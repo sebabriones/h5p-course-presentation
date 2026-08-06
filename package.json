@@ -1,6 +1,6 @@
 {
   "name": "h5p-course-presentation-cfrd",
-  "version": "1.0.0",
+  "version": "1.0.12",
   "description": "Course Presentation CFRD — fork of H5P Course Presentation for CFRD-UDEC.",
   "private": true,
   "scripts": {

@@ -15,6 +15,92 @@
   background-color: #fff;
 }
 
+/* Restricted progression used by CFRD level mode. The regular navigation
+ * remains initialized for state/xAPI handling, but is not interactive.
+ * Reclaim the hidden 3.5% nav into the slide area so the default 6.5% footer
+ * sits flush at the bottom with no leftover white gap. */
+.h5p-course-presentation-level-mode .h5p-cp-navigation,
+.h5p-course-presentation-level-mode .h5p-footer-left-adjusted,
+.h5p-course-presentation-level-mode .h5p-footer-center-adjusted {
+  display: none;
+}
+
+.h5p-course-presentation-level-mode .h5p-box-wrapper {
+  height: 93.5%;
+}
+
+.h5p-course-presentation-level-mode .h5p-footer {
+  overflow: visible;
+  position: relative;
+  z-index: 2;
+}
+
+.h5p-course-presentation-level-mode .h5p-slide.h5p-level-resolved .h5p-element {
+  pointer-events: none;
+}
+
+.h5p-course-presentation .h5p-level-controls {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  gap: 0.75em;
+  height: 100%;
+  justify-content: var(--h5p-cp-level-justify, center);
+  min-width: 0;
+  padding: 0 1em var(--h5p-cp-level-bottom-spacing, 0.75em);
+  position: relative;
+  z-index: 3;
+}
+
+.h5p-course-presentation .h5p-level-status {
+  color: #323232;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Match Joubel UI defaults until the author customizes appearance */
+.h5p-course-presentation .h5p-level-advance-button {
+  background: #1a73d9;
+  border: 0;
+  border-radius: 2em;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: bold;
+  line-height: 1.5;
+  padding: 0.5em 1.25em;
+  position: relative;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.h5p-course-presentation .h5p-level-advance-button:hover {
+  background: #1356a3;
+}
+
+.h5p-course-presentation .h5p-level-advance-button:focus {
+  box-shadow: 0 0 0 0.2em rgba(26, 115, 217, 0.35);
+  outline: 0.15em solid transparent;
+}
+
+/* Authored appearance (CFRD button variables, scoped to this container) */
+.h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button {
+  background: var(--h5p-cp-btn-bg);
+  border: var(--h5p-cp-btn-border-width) solid var(--h5p-cp-btn-border-color);
+  border-radius: var(--h5p-cp-btn-radius);
+  color: var(--h5p-cp-btn-text);
+}
+
+.h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button:hover,
+.h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button:focus {
+  background: var(--h5p-cp-btn-hover-bg);
+  border-color: var(--h5p-cp-btn-hover-border-color);
+  color: var(--h5p-cp-btn-hover-text);
+}
+
 /* Footer buttons */
 .h5p-course-presentation .h5p-footer .h5p-footer-button {
   display: inline-block;
@@ -48,6 +134,18 @@
 .h5p-course-presentation .h5p-footer .h5p-footer-center-adjusted {
   flex: 1;
   text-align: center;
+}
+
+/* Keep fullscreen/print in the footer. Must follow the base flex:2 rule above
+ * so Advance/Finish can center or align to the right in level mode. */
+.h5p-course-presentation.h5p-course-presentation-level-mode .h5p-level-controls {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.h5p-course-presentation.h5p-course-presentation-level-mode .h5p-footer .h5p-footer-right-adjusted {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 /* ---------------------------- Footer slide information buttons ----------------------- */
@@ -363,4 +461,181 @@
   color: #dbd7d1;
   outline: 2px solid #fff;
   background-color: transparent;
+}
+
+/* -------------------------------------- Dots navigation (CFRD) ---------------------------------- */
+
+.h5p-course-presentation-dots-nav .h5p-box-wrapper {
+  box-shadow: none;
+  height: 90%;
+  position: relative;
+}
+
+.h5p-course-presentation-dots-nav .h5p-cp-navigation {
+  align-items: center;
+  background-color: var(--h5p-cp-dots-bar-bg, #f5f5f5);
+  display: flex;
+  height: 3.5%;
+  justify-content: var(--h5p-cp-dots-align, center);
+  position: relative;
+  width: 100%;
+  z-index: 2;
+}
+
+.h5p-course-presentation-dots-nav .h5p-dots-nav-inner {
+  align-items: center;
+  display: flex;
+  gap: 0.5em;
+  height: 100%;
+  justify-content: center;
+  max-width: 100%;
+  padding: 0 0.5em;
+  width: var(--h5p-cp-dots-width, 20%);
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer {
+  background-color: #fff;
+  height: 6.5%;
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer-left-adjusted,
+.h5p-course-presentation-dots-nav .h5p-footer-center-adjusted {
+  display: none;
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer-right-adjusted {
+  flex: 1;
+  text-align: right;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar {
+  background: transparent;
+  box-shadow: none;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+  padding-top: 0.2em;
+  width: auto;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part {
+  flex: 1;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part:not(:last-child) {
+  border-right: 0;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part-show {
+  background: transparent;
+  filter: none;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part .h5p-progressbar-part-has-task {
+  background-color: var(--h5p-cp-dots-pending, #999999);
+  border: 2px solid transparent;
+  height: var(--h5p-cp-dots-size, 0.35em);
+  transition: transform 0.15s ease;
+  width: var(--h5p-cp-dots-size, 0.35em);
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part .h5p-progressbar-part-has-task:hover {
+  transform: scale(1.25);
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part .h5p-progressbar-part-has-task.h5p-answered,
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part.h5p-progressbar-part-show .h5p-progressbar-part-has-task.h5p-answered {
+  background-color: var(--h5p-cp-dots-answered, #1a73d9);
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part.h5p-progressbar-part-selected .h5p-progressbar-part-has-task {
+  background-color: var(--h5p-cp-dots-active, #1356a3);
+  border-color: var(--h5p-cp-dots-answered, #1a73d9);
+  box-shadow: 0 0 0 0.12em var(--h5p-cp-dots-answered, #1a73d9);
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part.progressbar-part-summary-slide {
+  display: none;
+}
+
+.h5p-course-presentation-dots-nav .h5p-progressbar .h5p-progressbar-part.h5p-progressbar-part-finish-locked {
+  pointer-events: none;
+}
+
+/* Arrow glyphs must not depend on being inside .h5p-footer */
+.h5p-course-presentation-dots-nav .h5p-footer-previous-slide,
+.h5p-course-presentation-dots-nav .h5p-footer-next-slide {
+  color: var(--h5p-cp-arrow-icon, #1a73d9);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer-previous-slide:before,
+.h5p-course-presentation-dots-nav .h5p-footer-next-slide:after {
+  background: var(--h5p-cp-arrow-bg, #e8f0fe);
+  border-radius: var(--h5p-cp-arrow-radius, 1em);
+  color: var(--h5p-cp-arrow-icon, #1a73d9);
+  font-family: 'H5PFontAwesome4';
+  font-size: 0.8em;
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer-previous-slide:before {
+  content: "\f053";
+  padding: 0.3em 0.5em 0.3em 0.4em;
+}
+
+.h5p-course-presentation-dots-nav .h5p-footer-next-slide:after {
+  content: "\f054";
+  padding: 0.3em 0.4em 0.3em 0.5em;
+}
+
+/* Finish lives on the slide canvas, not in the centered nav strip */
+.h5p-course-presentation-dots-nav .h5p-box-wrapper > .h5p-finish-btn-container {
+  bottom: 0.75em;
+  position: absolute;
+  right: 0.75em;
+  text-align: right;
+  z-index: 3;
+}
+
+.h5p-course-presentation-dots-nav .h5p-finish-btn {
+  background: #1a73d9;
+  border: 0;
+  border-radius: 2em;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font: inherit;
+  font-size: 0.75em;
+  font-weight: bold;
+  line-height: 1.4;
+  padding: 0.5em 1.25em;
+  white-space: nowrap;
+}
+
+.h5p-course-presentation-dots-nav .h5p-finish-btn:hover {
+  background: #1356a3;
+}
+
+.h5p-course-presentation-dots-nav .h5p-finish-btn:before {
+  content: "\f058";
+  font-family: "H5PFontAwesome4";
+  margin-right: 0.4em;
+}
+
+.h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn {
+  background: var(--h5p-cp-btn-bg);
+  border: var(--h5p-cp-btn-border-width) solid var(--h5p-cp-btn-border-color);
+  border-radius: var(--h5p-cp-btn-radius);
+  color: var(--h5p-cp-btn-text);
+}
+
+.h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn:hover,
+.h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn:focus {
+  background: var(--h5p-cp-btn-hover-bg);
+  border-color: var(--h5p-cp-btn-hover-border-color);
+  color: var(--h5p-cp-btn-hover-text);
 }

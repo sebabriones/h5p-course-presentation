@@ -241,3 +241,27 @@
   content: "\f021";
   margin-right: 0.5em;
 }
+
+/* Authored appearance (CFRD button variables, scoped to this container) */
+.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button {
+  background: var(--h5p-cp-btn-bg);
+  border: var(--h5p-cp-btn-border-width) solid var(--h5p-cp-btn-border-color);
+  border-radius: var(--h5p-cp-btn-radius);
+  box-shadow: none;
+  color: var(--h5p-cp-btn-text);
+}
+
+.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:hover,
+.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:focus,
+.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:active {
+  background: var(--h5p-cp-btn-hover-bg);
+  border-color: var(--h5p-cp-btn-hover-border-color);
+  box-shadow: none;
+  color: var(--h5p-cp-btn-hover-text);
+}
+
+/* Authored summary text color, applied to nodes with their own fixed color */
+.h5p-course-presentation .h5p-summary-slide .h5p-summary-task-title .h5p-slide-link,
+.h5p-course-presentation .h5p-summary-slide .h5p-summary-task-title .h5p-slide-link:visited {
+  color: var(--h5p-cp-summary-text, #333);
+}

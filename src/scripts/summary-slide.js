@@ -1,5 +1,5 @@
-﻿import { jQuery as $, JoubelUI } from './globals';
-import { addClickAndKeyboardListeners } from './utils';
+import { jQuery as $, JoubelUI } from './globals';
+import { addClickAndKeyboardListeners, isFunction } from './utils';
 
 const SummarySlide = (function () {
 
@@ -139,6 +139,10 @@ const SummarySlide = (function () {
         },
         appendTo: $summaryFooter
       });
+    }
+
+    if (isFunction(that.cp.applySummaryAppearance)) {
+      that.cp.applySummaryAppearance(that.$summarySlide);
     }
   };
 

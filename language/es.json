@@ -325,6 +325,343 @@
       ]
     },
     {
+      "label": "Modo niveles",
+      "description": "Restringe el avance para que cada diapositiva funcione como un nivel con exactamente una actividad puntuable.",
+      "fields": [
+        {
+          "label": "Activar modo niveles",
+          "description": "Desactiva la navegación libre y desbloquea únicamente el nivel siguiente. La diapositiva de resumen se conserva al final."
+        },
+        {
+          "label": "Criterio de avance",
+          "options": [
+            {
+              "label": "Porcentaje mínimo"
+            },
+            {
+              "label": "Puntaje mínimo"
+            },
+            {
+              "label": "Aprobación o máximo de intentos"
+            }
+          ]
+        },
+        {
+          "label": "Porcentaje mínimo de aprobación"
+        },
+        {
+          "label": "Puntaje mínimo de aprobación"
+        },
+        {
+          "label": "Número máximo de intentos",
+          "description": "El nivel siguiente se desbloquea cuando la actividad informa aprobación o se alcanza este número de intentos."
+        },
+        {
+          "label": "Avance después de cumplir el criterio",
+          "options": [
+            {
+              "label": "Automáticamente"
+            },
+            {
+              "label": "Mediante un botón"
+            }
+          ]
+        },
+        {
+          "label": "Retardo del avance automático",
+          "description": "Tiempo en milisegundos antes de avanzar al nivel siguiente."
+        },
+        {
+          "label": "Etiqueta del botón de nivel siguiente",
+          "default": "Avanzar"
+        },
+        {
+          "label": "Etiqueta del botón del nivel final",
+          "default": "Terminar"
+        },
+        {
+          "label": "Alineación del botón",
+          "options": [
+            {
+              "label": "Al centro"
+            },
+            {
+              "label": "A la derecha"
+            }
+          ]
+        },
+        {
+          "label": "Separación inferior del botón",
+          "description": "Distancia entre el botón y el borde inferior."
+        },
+        {
+          "label": "Apariencia del botón de avance",
+          "description": "Estilo de los botones Avanzar y Terminar. Los colores de borde se aplican solo cuando el borde está activado.",
+          "fields": [
+            {
+              "label": "Usar fondo degradado"
+            },
+            {
+              "label": "Color de fondo del botón"
+            },
+            {
+              "label": "Fondo degradado",
+              "fields": [
+                {
+                  "label": "Ángulo del degradado",
+                  "description": "Dirección en grados (0 = hacia arriba, 180 = hacia abajo)."
+                },
+                {
+                  "label": "Color inicial del degradado"
+                },
+                {
+                  "label": "Color final del degradado"
+                }
+              ]
+            },
+            {
+              "label": "Color del texto del botón"
+            },
+            {
+              "label": "Color de fondo del botón al pasar el puntero"
+            },
+            {
+              "label": "Color del texto del botón al pasar el puntero"
+            },
+            {
+              "label": "Usar borde en el botón"
+            },
+            {
+              "label": "Configuración del borde",
+              "fields": [
+                {
+                  "label": "Color del borde del botón"
+                },
+                {
+                  "label": "Color del borde del botón al pasar el puntero"
+                }
+              ]
+            },
+            {
+              "label": "Radio de las esquinas del botón",
+              "description": "Los valores menores son más rectos; los mayores, más redondeados."
+            }
+          ]
+        },
+        {
+          "label": "Mostrar mensajes de estado del nivel",
+          "description": "Muestra mensajes de nivel bloqueado, completado e intentos restantes en los controles del nivel."
+        },
+        {
+          "label": "Mensaje de nivel completado",
+          "default": "Siguiente nivel"
+        },
+        {
+          "label": "Mensaje de nivel bloqueado",
+          "default": "Complete la actividad para desbloquear el nivel siguiente."
+        },
+        {
+          "label": "Mensaje de intentos restantes",
+          "description": "Use @attempts para indicar el número de intentos restantes.",
+          "default": "Intentos restantes: @attempts"
+        }
+      ]
+    },
+    {
+      "label": "Apariencia de la diapositiva de resumen",
+      "description": "Solo afecta la diapositiva de resumen de esta presentación, no a las actividades embebidas.",
+      "fields": [
+        {
+          "label": "Colores de la diapositiva de resumen",
+          "fields": [
+            {
+              "label": "Color de fondo de la diapositiva de resumen"
+            },
+            {
+              "label": "Color del texto de la diapositiva de resumen"
+            }
+          ]
+        },
+        {
+          "label": "Botones de acción del resumen",
+          "description": "Estilo compartido para los botones Mostrar soluciones, Reintentar y Exportar texto. Los colores de borde se aplican solo cuando el borde está activado.",
+          "fields": [
+            {
+              "label": "Usar fondo degradado"
+            },
+            {
+              "label": "Color de fondo del botón"
+            },
+            {
+              "label": "Fondo degradado",
+              "fields": [
+                {
+                  "label": "Ángulo del degradado",
+                  "description": "Dirección en grados (0 = hacia arriba, 180 = hacia abajo)."
+                },
+                {
+                  "label": "Color inicial del degradado"
+                },
+                {
+                  "label": "Color final del degradado"
+                }
+              ]
+            },
+            {
+              "label": "Color del texto del botón"
+            },
+            {
+              "label": "Color de fondo del botón al pasar el puntero"
+            },
+            {
+              "label": "Color del texto del botón al pasar el puntero"
+            },
+            {
+              "label": "Usar borde en el botón"
+            },
+            {
+              "label": "Configuración del borde",
+              "fields": [
+                {
+                  "label": "Color del borde del botón"
+                },
+                {
+                  "label": "Color del borde del botón al pasar el puntero"
+                }
+              ]
+            },
+            {
+              "label": "Radio de las esquinas del botón",
+              "description": "El valor predeterminado es 2em (Joubel UI). Los valores menores son más rectos; los mayores, más redondeados."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Apariencia de la navegación",
+      "description": "Estilo de la barra de progreso en el modo normal (sin niveles). No afecta a las actividades embebidas.",
+      "fields": [
+        {
+          "label": "Estilo de navegación",
+          "description": "Clásico conserva la barra predeterminada de Course Presentation. Puntos la reemplaza por un indicador compacto.",
+          "options": [
+            {
+              "label": "Clásico"
+            },
+            {
+              "label": "Puntos"
+            }
+          ]
+        },
+        {
+          "label": "Forzar color de fondo de la barra y el pie",
+          "description": "Opcional. Si está vacío, la barra de navegación y el pie usan el color de fondo de la diapositiva actual."
+        },
+        {
+          "label": "Color del punto pendiente"
+        },
+        {
+          "label": "Color del punto respondido"
+        },
+        {
+          "label": "Color del punto activo"
+        },
+        {
+          "label": "Tamaño del punto"
+        },
+        {
+          "label": "Ancho de la barra",
+          "description": "Ancho de la barra de puntos respecto a la presentación."
+        },
+        {
+          "label": "Alineación de la barra",
+          "options": [
+            {
+              "label": "Izquierda"
+            },
+            {
+              "label": "Al centro"
+            },
+            {
+              "label": "A la derecha"
+            }
+          ]
+        },
+        {
+          "label": "Color del icono de las flechas"
+        },
+        {
+          "label": "Color de fondo de las flechas"
+        },
+        {
+          "label": "Radio de las esquinas de las flechas"
+        },
+        {
+          "label": "Activar botón Terminar",
+          "description": "Cuando está activo, la diapositiva de resumen permanece bloqueada hasta que cada diapositiva con tarea haya sido respondida. Evita statements completed prematuros. Por omisión está desactivado para conservar la navegación libre."
+        },
+        {
+          "label": "Etiqueta del botón Terminar",
+          "default": "Terminar"
+        },
+        {
+          "label": "Apariencia del botón Terminar",
+          "description": "Estilo del botón Terminar que desbloquea la diapositiva de resumen. Los colores de borde se aplican solo cuando el borde está activado.",
+          "fields": [
+            {
+              "label": "Usar fondo degradado"
+            },
+            {
+              "label": "Color de fondo del botón"
+            },
+            {
+              "label": "Fondo degradado",
+              "fields": [
+                {
+                  "label": "Ángulo del degradado",
+                  "description": "Dirección en grados (0 = hacia arriba, 180 = hacia abajo)."
+                },
+                {
+                  "label": "Color inicial del degradado"
+                },
+                {
+                  "label": "Color final del degradado"
+                }
+              ]
+            },
+            {
+              "label": "Color del texto del botón"
+            },
+            {
+              "label": "Color de fondo del botón al pasar el puntero"
+            },
+            {
+              "label": "Color del texto del botón al pasar el puntero"
+            },
+            {
+              "label": "Usar borde en el botón"
+            },
+            {
+              "label": "Configuración del borde",
+              "fields": [
+                {
+                  "label": "Color del borde del botón"
+                },
+                {
+                  "label": "Color del borde del botón al pasar el puntero"
+                }
+              ]
+            },
+            {
+              "label": "Radio de las esquinas del botón",
+              "description": "El valor predeterminado es 2em (Joubel UI). Los valores menores son más rectos; los mayores, más redondeados."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "fields": [
         {
           "field": {

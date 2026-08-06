@@ -7,11 +7,46 @@ import { jQuery as $ } from './globals';
 import { flattenArray, addClickAndKeyboardListeners, isFunction, kebabCase, stripHTML, keyCode } from './utils';
 import Slide from './slide.js';
 import ConfirmationDialog from './confirmation-dialog';
+import { applyButtonAppearance } from './button-appearance';
 
 /**
  * @const {string}
  */
 const KEYWORD_TITLE_SKIP = null;
+
+const LEVEL_MODE_DEFAULTS = {
+  enabled: false,
+  criterion: 'percentage',
+  minimumPercentage: 60,
+  minimumScore: 1,
+  maxAttempts: 3,
+  advanceMode: 'button',
+  automaticAdvanceDelay: 650,
+  nextLevelButtonLabel: 'Advance',
+  finishButtonLabel: 'Finish',
+  buttonAlignment: 'center',
+  buttonBottomSpacing: 0.75,
+  showStatusMessages: false,
+  levelUnlockedMessage: 'Next level',
+  levelBlockedMessage: 'Complete the activity to unlock the next level.',
+  attemptsRemainingMessage: 'Attempts remaining: @attempts'
+};
+
+const NAVIGATION_APPEARANCE_DEFAULTS = {
+  style: 'classic',
+  barBackgroundColor: '',
+  dotPendingColor: '#999999',
+  dotAnsweredColor: '#1a73d9',
+  dotActiveColor: '#1356a3',
+  dotSize: 0.35,
+  barWidth: 20,
+  barAlignment: 'center',
+  arrowIconColor: '#1a73d9',
+  arrowBackgroundColor: '#e8f0fe',
+  arrowBorderRadius: 1,
+  finishButtonEnabled: false,
+  finishButtonLabel: 'Finish'
+};
 
 /**
  * Constructor.
@@ -28,6 +63,17 @@ let CoursePresentation = function (params, id, extras) {
   this.slides = this.presentation.slides;
   this.contentId = id;
   this.instructions = params.instructions;
+  this.levelMode = $.extend({}, LEVEL_MODE_DEFAULTS, params.levelMode || {});
+  this.levelMode.enabled = !!this.levelMode.enabled;
+  this.summaryAppearance = params.summaryAppearance || {};
+  this.navigationAppearance = $.extend(
+    {},
+    NAVIGATION_APPEARANCE_DEFAULTS,
+    params.navigationAppearance || {}
+  );
+  this.levelInternalNavigation = false;
+  this.levelAdvanceTimer = null;
+  this.finishInternalNavigation = false;
   this.elementInstances = []; // elementInstances holds the instances for elements in an array.
   this.elementsAttached = []; // Map to keep track of which slide has attached elements
   this.slidesWithSolutions = [];
@@ -48,6 +94,24 @@ let CoursePresentation = function (params, id, extras) {
     this.standalone = extras.standalone;
     this.isReportingEnabled = extras.isReportingEnabled || extras.isScoringEnabled;
   }
+
+  this.levelAttempts = (
+    this.previousState &&
+    this.previousState.levelMode &&
+    Array.isArray(this.previousState.levelMode.attempts)
+  ) ? this.previousState.levelMode.attempts.slice() : [];
+  this.levelUnlocked = (
+    this.previousState &&
+    this.previousState.levelMode &&
+    Array.isArray(this.previousState.levelMode.unlocked)
+  ) ? this.previousState.levelMode.unlocked.slice() : [];
+  this.finishAnsweredSlides = new Set(
+    (
+      this.previousState &&
+      this.previousState.navigationFinish &&
+      Array.isArray(this.previousState.navigationFinish.answeredSlides)
+    ) ? this.previousState.navigationFinish.answeredSlides : []
+  );
 
   this.currentSlideIndex = (this.previousState && this.previousState.progress) ? this.previousState.progress : 0;
 
@@ -129,6 +193,18 @@ let CoursePresentation = function (params, id, extras) {
       this.facebookShareQuote = params.override.social.facebookShare.quote;
 
       this.googleShareUrl = params.override.social.googleShareUrl;
+    }
+  }
+
+  // Level mode has its own restricted navigation, but keeps SummarySlide alive
+  // so Course Presentation can emit its aggregate xAPI completed statement.
+  if (this.levelMode.enabled) {
+    this.activeSurface = false;
+    this.hideSummarySlide = false;
+
+    // The keyword sidebar is another route for jumping between slides.
+    if (!extras.cpEditor) {
+      this.presentation.keywordListEnabled = false;
     }
   }
 
@@ -233,6 +309,651 @@ CoursePresentation.prototype.refreshInstructionsScale = function () {
 };
 
 /**
+ * Whether restricted level progression is active in the player.
+ *
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.isLevelModeEnabled = function () {
+  return this.editor === undefined && this.levelMode.enabled;
+};
+
+/**
+ * Background color for the dots chrome (nav + footer).
+ * Uses the authored override when set; otherwise the slide fill color.
+ *
+ * @param {number} [slideIndex]
+ * @returns {string}
+ */
+CoursePresentation.prototype.getDotsChromeBackgroundColor = function (slideIndex) {
+  const override = this.navigationAppearance.barBackgroundColor;
+  if (override) {
+    return override;
+  }
+
+  const index = (slideIndex === undefined) ? this.currentSlideIndex : slideIndex;
+  return this.getLevelBackgroundColor(index) || '#f5f5f5';
+};
+
+/**
+ * Whether the compact dots navigation style is active.
+ * Incompatible with level mode, which hides the progress bar.
+ *
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.isDotsNavigationEnabled = function () {
+  return this.editor === undefined &&
+    this.navigationAppearance.style === 'dots' &&
+    !this.levelMode.enabled;
+};
+
+/**
+ * Whether the optional Finish gate is locking the summary slide.
+ *
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.isFinishGateEnabled = function () {
+  return this.isDotsNavigationEnabled() &&
+    !!this.navigationAppearance.finishButtonEnabled &&
+    !!this.showSummarySlide;
+};
+
+/**
+ * Slide indexes that must emit answered before Finish unlocks summary.
+ *
+ * @returns {number[]}
+ */
+CoursePresentation.prototype.getRequiredFinishSlideIndexes = function () {
+  const indexes = [];
+  const lastContentIndex = this.showSummarySlide ?
+    this.slides.length - 2 :
+    this.slides.length - 1;
+
+  for (let i = 0; i <= lastContentIndex; i++) {
+    if (this.slidesWithSolutions[i] && this.slidesWithSolutions[i].length) {
+      indexes.push(i);
+    }
+  }
+
+  return indexes;
+};
+
+/**
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.areAllFinishSlidesAnswered = function () {
+  const required = this.getRequiredFinishSlideIndexes();
+  if (!required.length) {
+    return true;
+  }
+
+  return required.every((index) => this.finishAnsweredSlides.has(index));
+};
+
+/**
+ * Record a strict answered event for the Finish gate.
+ *
+ * @param {number} slideIndex Slide index.
+ */
+CoursePresentation.prototype.markFinishSlideAnswered = function (slideIndex) {
+  if (!this.isFinishGateEnabled() || slideIndex === undefined) {
+    return;
+  }
+
+  this.finishAnsweredSlides.add(slideIndex);
+  if (this.navigationLine && isFunction(this.navigationLine.updateFinishButton)) {
+    this.navigationLine.updateFinishButton();
+  }
+};
+
+/**
+ * Clear Finish-gate progress (used by resetTask).
+ */
+CoursePresentation.prototype.resetFinishGate = function () {
+  this.finishAnsweredSlides.clear();
+  if (this.navigationLine && isFunction(this.navigationLine.updateFinishButton)) {
+    this.navigationLine.updateFinishButton();
+  }
+  if (this.navigationLine && isFunction(this.navigationLine.showDotsNavigation)) {
+    this.navigationLine.showDotsNavigation();
+  }
+};
+
+/**
+ * Jump to the summary slide through the Finish button.
+ *
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.advanceToSummaryViaFinish = function () {
+  if (!this.isFinishGateEnabled() || !this.areAllFinishSlidesAnswered()) {
+    return false;
+  }
+
+  const summaryIndex = this.slides.length - 1;
+  this.finishInternalNavigation = true;
+  const result = this.processJumpToSlide(summaryIndex, false, true);
+  this.finishInternalNavigation = false;
+
+  if (result && this.navigationLine && isFunction(this.navigationLine.hideDotsNavigationOnSummary)) {
+    this.navigationLine.hideDotsNavigationOnSummary();
+  }
+
+  return result;
+};
+
+/**
+ * Block free jumps to the summary while the Finish gate is locked.
+ *
+ * @param {number} slideNumber Destination slide.
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.canNavigateWithFinishGate = function (slideNumber) {
+  if (
+    !this.isFinishGateEnabled() ||
+    this.finishInternalNavigation ||
+    this.isSolutionMode
+  ) {
+    return true;
+  }
+
+  if (slideNumber === this.currentSlideIndex) {
+    return true;
+  }
+
+  const summaryIndex = this.slides.length - 1;
+  if (slideNumber === summaryIndex) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Return the single scored task configured for a level.
+ *
+ * @param {number} slideIndex Slide index.
+ * @returns {object|null}
+ */
+CoursePresentation.prototype.getLevelTask = function (slideIndex) {
+  const tasks = (this.elementInstances[slideIndex] || [])
+    .filter((task) => this.hasScoreData(task));
+
+  return tasks.length === 1 ? tasks[0] : null;
+};
+
+/**
+ * Register level progression directly on an element as soon as it is created.
+ * This also covers slides instantiated lazily after NavigationLine initialized.
+ *
+ * @param {number} slideIndex Slide index.
+ * @param {object} interaction Task instance.
+ */
+CoursePresentation.prototype.registerLevelTaskListener = function (slideIndex, interaction) {
+  if (
+    !this.isLevelModeEnabled() ||
+    !this.hasScoreData(interaction) ||
+    !isFunction(interaction.on) ||
+    interaction.coursePresentationCFRDLevelListener
+  ) {
+    return;
+  }
+
+  interaction.coursePresentationCFRDLevelListener = true;
+  interaction.on('xAPI', (event) => {
+    this.handleLevelTaskEvent(
+      slideIndex,
+      interaction,
+      event,
+      event.getVerb()
+    );
+  });
+};
+
+/**
+ * Return current score data for a level.
+ *
+ * @param {number} slideIndex Slide index.
+ * @returns {{score: number, maxScore: number, percentage: number}}
+ */
+CoursePresentation.prototype.getLevelScoreData = function (slideIndex) {
+  const task = this.getLevelTask(slideIndex);
+  const score = task ? Number(task.getScore()) || 0 : 0;
+  const maxScore = task ? Number(task.getMaxScore()) || 0 : 0;
+
+  return {
+    score: score,
+    maxScore: maxScore,
+    percentage: maxScore > 0 ? (score / maxScore) * 100 : 0
+  };
+};
+
+/**
+ * Return the configured automatic transition delay.
+ *
+ * @returns {number} Delay in milliseconds.
+ */
+CoursePresentation.prototype.getAutomaticAdvanceDelay = function () {
+  const delay = Number(this.levelMode.automaticAdvanceDelay);
+  if (!Number.isFinite(delay)) {
+    return LEVEL_MODE_DEFAULTS.automaticAdvanceDelay;
+  }
+
+  return Math.min(60000, Math.max(0, delay));
+};
+
+/**
+ * Return the fill color that applies to the current authored slide.
+ *
+ * @param {number} slideIndex Slide index.
+ * @returns {string} CSS color or empty string.
+ */
+CoursePresentation.prototype.getLevelBackgroundColor = function (slideIndex) {
+  const globalSelector = this.presentation.globalBackgroundSelector || {};
+  const slide = this.presentation.slides[slideIndex] || {};
+  const slideSelector = slide.slideBackgroundSelector || {};
+
+  return slideSelector.fillSlideBackground ||
+    globalSelector.fillGlobalBackground ||
+    '';
+};
+
+/**
+ * Place the advance button according to the authored alignment and spacing.
+ */
+CoursePresentation.prototype.applyLevelButtonLayout = function () {
+  if (!this.$levelControls || !this.$levelControls.length) {
+    return;
+  }
+
+  const style = this.$levelControls.get(0).style;
+  const spacing = Number(this.levelMode.buttonBottomSpacing);
+  const bottomSpacing = Number.isFinite(spacing) ?
+    Math.min(4, Math.max(0, spacing)) :
+    LEVEL_MODE_DEFAULTS.buttonBottomSpacing;
+
+  style.setProperty(
+    '--h5p-cp-level-justify',
+    this.levelMode.buttonAlignment === 'right' ? 'flex-end' : 'center'
+  );
+  style.setProperty('--h5p-cp-level-bottom-spacing', bottomSpacing + 'em');
+};
+
+/**
+ * Apply the authored colors and button style to the summary slide.
+ *
+ * @param {H5P.jQuery} $summarySlide Summary slide element.
+ */
+CoursePresentation.prototype.applySummaryAppearance = function ($summarySlide) {
+  if (!$summarySlide || !$summarySlide.length) {
+    return;
+  }
+
+  const slideColors = this.summaryAppearance.slide;
+  if (slideColors) {
+    const style = $summarySlide.get(0).style;
+
+    if (slideColors.backgroundColor) {
+      style.backgroundColor = slideColors.backgroundColor;
+    }
+    if (slideColors.textColor) {
+      style.setProperty('--h5p-cp-summary-text', slideColors.textColor);
+      style.color = slideColors.textColor;
+    }
+  }
+
+  applyButtonAppearance(
+    $('.h5p-summary-footer', $summarySlide),
+    this.summaryAppearance.actionButtons
+  );
+};
+
+/**
+ * Prevent further interaction with a resolved level.
+ *
+ * @param {number} slideIndex Slide index.
+ */
+CoursePresentation.prototype.lockLevelInteraction = function (slideIndex) {
+  if (!this.$slidesWrapper || slideIndex >= this.slides.length - 1) {
+    return;
+  }
+
+  const $slide = this.$slidesWrapper.children().eq(slideIndex);
+  const slideElement = $slide.get(0);
+  if (!slideElement || $slide.hasClass('h5p-level-resolved')) {
+    return;
+  }
+
+  $slide
+    .addClass('h5p-level-resolved')
+    .attr('aria-disabled', 'true')
+    .prop('inert', true);
+
+  const blockInteraction = function (event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+  slideElement.coursePresentationCFRDLevelBlocker = blockInteraction;
+  ['click', 'keydown', 'pointerdown', 'touchstart'].forEach((eventName) => {
+    slideElement.addEventListener(eventName, blockInteraction, true);
+  });
+
+  const task = this.getLevelTask(slideIndex);
+  if (task && isFunction(task.hideButton)) {
+    task.hideButton('try-again');
+    task.hideButton('show-solution');
+  }
+};
+
+/**
+ * Remove all interaction locks when the whole presentation is reset.
+ */
+CoursePresentation.prototype.unlockAllLevelInteractions = function () {
+  if (!this.$slidesWrapper) {
+    return;
+  }
+
+  this.$slidesWrapper.children('.h5p-level-resolved').each(function () {
+    const blocker = this.coursePresentationCFRDLevelBlocker;
+    if (blocker) {
+      ['click', 'keydown', 'pointerdown', 'touchstart'].forEach((eventName) => {
+        this.removeEventListener(eventName, blocker, true);
+      });
+      delete this.coursePresentationCFRDLevelBlocker;
+    }
+
+    $(this)
+      .removeClass('h5p-level-resolved')
+      .removeAttr('aria-disabled')
+      .prop('inert', false);
+  });
+};
+
+/**
+ * Check whether an xAPI statement belongs to the top-level task in a slide,
+ * rather than a nested question inside a compound task.
+ *
+ * @param {object} interaction Slide task instance.
+ * @param {object} event xAPI event.
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.isDirectLevelStatement = function (interaction, event) {
+  if (!interaction || !interaction.subContentId) {
+    return true;
+  }
+
+  const statement = event && event.data && event.data.statement;
+  if (!statement) {
+    return false;
+  }
+
+  const objectId = statement.object && statement.object.id ?
+    statement.object.id :
+    '';
+  const extensions = statement.object &&
+    statement.object.definition &&
+    statement.object.definition.extensions ?
+    statement.object.definition.extensions :
+    {};
+  const extensionId = extensions['http://h5p.org/x-api/h5p-subContentId'];
+
+  return extensionId === interaction.subContentId ||
+    objectId.indexOf('subContentId=' + interaction.subContentId) !== -1;
+};
+
+/**
+ * Handle a completed answer attempt from the task in a level.
+ *
+ * @param {number} slideIndex Slide index.
+ * @param {object} interaction Task instance.
+ * @param {object} event xAPI event.
+ * @param {string} verb Original short xAPI verb.
+ */
+CoursePresentation.prototype.handleLevelTaskEvent = function (slideIndex, interaction, event, verb) {
+  if (
+    !this.isLevelModeEnabled() ||
+    slideIndex !== this.currentSlideIndex ||
+    this.levelUnlocked[slideIndex] ||
+    ['answered', 'completed'].indexOf(verb) === -1 ||
+    !this.isDirectLevelStatement(interaction, event)
+  ) {
+    return;
+  }
+
+  const statement = event && event.data && event.data.statement;
+  const nativeSuccess = !!(
+    statement &&
+    statement.result &&
+    statement.result.success === true
+  );
+  const that = this;
+
+  // Read score after the child has finished updating its own state.
+  setTimeout(function () {
+    if (slideIndex !== that.currentSlideIndex || that.levelUnlocked[slideIndex]) {
+      return;
+    }
+
+    that.levelAttempts[slideIndex] = (that.levelAttempts[slideIndex] || 0) + 1;
+    that.evaluateLevelProgress(slideIndex, nativeSuccess);
+  }, 0);
+};
+
+/**
+ * Evaluate the configured global progression rule.
+ *
+ * @param {number} slideIndex Slide index.
+ * @param {boolean} nativeSuccess Whether the activity reported success.
+ */
+CoursePresentation.prototype.evaluateLevelProgress = function (slideIndex, nativeSuccess = false) {
+  if (!this.isLevelModeEnabled() || this.levelUnlocked[slideIndex]) {
+    return;
+  }
+
+  const data = this.getLevelScoreData(slideIndex);
+  const attempts = this.levelAttempts[slideIndex] || 0;
+  let passed = false;
+
+  switch (this.levelMode.criterion) {
+    case 'score':
+      passed = data.score >= Number(this.levelMode.minimumScore || 0);
+      break;
+
+    case 'attempts':
+      passed = nativeSuccess ||
+        (data.maxScore > 0 && data.score >= data.maxScore) ||
+        attempts >= Number(this.levelMode.maxAttempts || 1);
+      break;
+
+    case 'percentage':
+    default:
+      passed = data.maxScore > 0 &&
+        data.percentage >= Number(this.levelMode.minimumPercentage || 0);
+      break;
+  }
+
+  if (passed) {
+    this.unlockCurrentLevel(slideIndex);
+  }
+  else {
+    this.updateLevelControls(false);
+  }
+};
+
+/**
+ * Mark a level as unlocked and follow the configured advance mode.
+ *
+ * @param {number} slideIndex Slide index.
+ */
+CoursePresentation.prototype.unlockCurrentLevel = function (slideIndex) {
+  if (slideIndex !== this.currentSlideIndex || this.levelUnlocked[slideIndex]) {
+    return;
+  }
+
+  this.levelUnlocked[slideIndex] = true;
+  this.lockLevelInteraction(slideIndex);
+  this.updateLevelControls(true);
+
+  if (this.levelMode.advanceMode === 'automatic') {
+    const that = this;
+    clearTimeout(this.levelAdvanceTimer);
+    this.levelAdvanceTimer = setTimeout(function () {
+      that.advanceToNextLevel();
+    }, this.getAutomaticAdvanceDelay());
+  }
+};
+
+/**
+ * Create the minimal progression UI without removing SummarySlide.
+ */
+CoursePresentation.prototype.initializeLevelMode = function () {
+  if (!this.isLevelModeEnabled()) {
+    return;
+  }
+
+  this.$container.addClass('h5p-course-presentation-level-mode');
+  this.$levelControls = $('<div>', {
+    'class': 'h5p-level-controls',
+    'aria-live': 'polite'
+  }).insertBefore(this.$footer.children('.h5p-footer-right-adjusted'));
+
+  this.$levelStatus = $('<span>', {
+    'class': 'h5p-level-status'
+  }).appendTo(this.$levelControls);
+
+  this.$levelAdvanceButton = $('<button>', {
+    'class': 'h5p-level-advance-button',
+    type: 'button'
+  })
+    .on('click', () => this.advanceToNextLevel())
+    .appendTo(this.$levelControls);
+
+  this.applyLevelButtonLayout();
+  applyButtonAppearance(this.$levelControls, this.levelMode.buttonAppearance);
+
+  const restoredUnlocked = !!this.levelUnlocked[this.currentSlideIndex];
+  if (restoredUnlocked) {
+    this.lockLevelInteraction(this.currentSlideIndex);
+  }
+  this.updateLevelControls(restoredUnlocked);
+
+  if (restoredUnlocked && this.levelMode.advanceMode === 'automatic') {
+    this.levelAdvanceTimer = setTimeout(
+      () => this.advanceToNextLevel(),
+      this.getAutomaticAdvanceDelay()
+    );
+  }
+
+  // Restore an unlocked score-based level even if it was saved before the
+  // dedicated level state existed.
+  if (!this.levelUnlocked[this.currentSlideIndex] &&
+      this.levelMode.criterion !== 'attempts') {
+    this.evaluateLevelProgress(this.currentSlideIndex);
+  }
+};
+
+/**
+ * Update level status and optional manual advance button.
+ *
+ * @param {boolean} unlocked Whether the current level is unlocked.
+ */
+CoursePresentation.prototype.updateLevelControls = function (unlocked) {
+  if (!this.$levelControls || !this.$levelControls.length) {
+    return;
+  }
+
+  const isSummarySlide = this.showSummarySlide &&
+    this.currentSlideIndex === this.slides.length - 1;
+  this.$levelControls.toggle(!isSummarySlide);
+  if (isSummarySlide) {
+    this.$footer.css('background-color', '');
+    return;
+  }
+
+  this.$footer.css(
+    'background-color',
+    this.getLevelBackgroundColor(this.currentSlideIndex)
+  );
+
+  const isLastLevel = this.showSummarySlide &&
+    this.currentSlideIndex === this.slides.length - 2;
+  let message = this.levelMode.levelBlockedMessage;
+
+  if (unlocked) {
+    message = this.levelMode.levelUnlockedMessage;
+  }
+  else if (this.levelMode.criterion === 'attempts') {
+    const remaining = Math.max(
+      0,
+      Number(this.levelMode.maxAttempts || 1) -
+      (this.levelAttempts[this.currentSlideIndex] || 0)
+    );
+    message = String(this.levelMode.attemptsRemainingMessage)
+      .replace('@attempts', remaining);
+  }
+
+  this.$levelStatus
+    .text(this.levelMode.showStatusMessages ? (message || '') : '')
+    .toggle(!!this.levelMode.showStatusMessages);
+  this.$levelAdvanceButton
+    .text(isLastLevel ?
+      this.levelMode.finishButtonLabel :
+      this.levelMode.nextLevelButtonLabel)
+    .toggle(
+      !!unlocked &&
+      this.levelMode.advanceMode === 'button'
+    );
+};
+
+/**
+ * Advance exactly one level (or enter SummarySlide after the last level).
+ *
+ * @returns {boolean} Whether navigation was requested.
+ */
+CoursePresentation.prototype.advanceToNextLevel = function () {
+  if (
+    !this.isLevelModeEnabled() ||
+    !this.levelUnlocked[this.currentSlideIndex]
+  ) {
+    this.updateLevelControls(false);
+    return false;
+  }
+
+  const nextIndex = this.currentSlideIndex + 1;
+  if (nextIndex >= this.slides.length) {
+    return false;
+  }
+
+  this.levelInternalNavigation = true;
+  const result = this.processJumpToSlide(nextIndex, false, true);
+  this.levelInternalNavigation = false;
+  return result;
+};
+
+/**
+ * Determine whether a requested slide transition is allowed.
+ *
+ * @param {number} slideNumber Destination slide.
+ * @returns {boolean}
+ */
+CoursePresentation.prototype.canNavigateInLevelMode = function (slideNumber) {
+  if (
+    !this.isLevelModeEnabled() ||
+    this.levelInternalNavigation ||
+    this.isSolutionMode
+  ) {
+    return true;
+  }
+
+  // Re-running the current index is needed when restoring previous state.
+  if (slideNumber === this.currentSlideIndex) {
+    return true;
+  }
+
+  // Even after unlocking, progression must use the configured automatic
+  // transition or the dedicated button (not keyboard, swipe or Go To Slide).
+  return false;
+};
+
+/**
  * @public
  * @return {object}
  */
@@ -245,6 +966,19 @@ CoursePresentation.prototype.getCurrentState = function () {
 
   state.answered = this.elementInstances
     .map((interaction, index) => (this.slideHasAnsweredTask(index)) || null);
+
+  if (this.levelMode.enabled) {
+    state.levelMode = {
+      attempts: this.levelAttempts.slice(),
+      unlocked: this.levelUnlocked.slice()
+    };
+  }
+
+  if (this.isFinishGateEnabled()) {
+    state.navigationFinish = {
+      answeredSlides: Array.from(this.finishAnsweredSlides)
+    };
+  }
 
   // Get answers and answered
   for (var slide = 0; slide < this.elementInstances.length; slide++) {
@@ -440,6 +1174,10 @@ CoursePresentation.prototype.attach = function ($container) {
     });
   }
 
+  if (this.isLevelModeEnabled()) {
+    this.showSummarySlide = true;
+  }
+
   if ((this.editor === undefined) && (this.showSummarySlide || this.hasAnswerElements)) {
     // Create the summary slide
     var summarySlideParams = {
@@ -500,6 +1238,14 @@ CoursePresentation.prototype.attach = function ($container) {
     }
 
     this.summarySlideObject = new SummarySlide(this, $summarySlide);
+
+    if (this.isLevelModeEnabled()) {
+      this.initializeLevelMode();
+    }
+
+    if (this.isDotsNavigationEnabled() && this.navigationLine) {
+      this.navigationLine.setupDotsNavigation();
+    }
   }
   else {
     this.$progressbar.add(this.$footer).remove();
@@ -1928,6 +2674,16 @@ CoursePresentation.prototype.attachAllElements = function () {
  */
 CoursePresentation.prototype.processJumpToSlide = function (slideNumber, noScroll, handleFocus) {
   var that = this;
+
+  if (!this.canNavigateInLevelMode(slideNumber)) {
+    this.updateLevelControls(false);
+    return false;
+  }
+
+  if (!this.canNavigateWithFinishGate(slideNumber)) {
+    return false;
+  }
+
   if (this.editor === undefined && this.contentId) { // Content ID avoids crash when previewing in editor before saving
     var progressedEvent = this.createXAPIEventTemplate('progressed');
     progressedEvent.data.statement.object.definition.extensions['http://id.tincanapi.com/extension/ending-point'] = slideNumber + 1;
@@ -2022,6 +2778,25 @@ CoursePresentation.prototype.processJumpToSlide = function (slideNumber, noScrol
   if (that.summarySlideObject) {
     // Update summary slide if on last slide, do not jump
     that.summarySlideObject.updateSummarySlide(slideNumber, true);
+  }
+
+  if (this.isLevelModeEnabled()) {
+    clearTimeout(this.levelAdvanceTimer);
+    const currentLevelUnlocked = !!this.levelUnlocked[slideNumber];
+    if (currentLevelUnlocked) {
+      this.lockLevelInteraction(slideNumber);
+    }
+    this.updateLevelControls(currentLevelUnlocked);
+    if (
+      currentLevelUnlocked &&
+      this.levelMode.advanceMode === 'automatic' &&
+      slideNumber < this.slides.length - 1
+    ) {
+      this.levelAdvanceTimer = setTimeout(
+        () => this.advanceToNextLevel(),
+        this.getAutomaticAdvanceDelay()
+      );
+    }
   }
 
   // Editor specific settings
@@ -2144,6 +2919,11 @@ CoursePresentation.prototype.setSlideNumberAnnouncer = function (slideNumber, ha
  */
 CoursePresentation.prototype.resetTask = function (moveFocus = false) {
   this.summarySlideObject?.toggleSolutionMode(false);
+  clearTimeout(this.levelAdvanceTimer);
+  this.unlockAllLevelInteractions();
+  this.levelAttempts = [];
+  this.levelUnlocked = [];
+  this.resetFinishGate();
   for (var i = 0; i < this.elementInstances.length; i++) {
     if (this.elementInstances[i]) {
       for (var j = 0; j < this.elementInstances[i].length; j++) {
@@ -2156,7 +2936,12 @@ CoursePresentation.prototype.resetTask = function (moveFocus = false) {
   }
   this.navigationLine?.updateProgressBar(0);
   if (this.$container) {
-    this.jumpToSlide(0, false);
+    this.levelInternalNavigation = true;
+    this.finishInternalNavigation = true;
+    this.processJumpToSlide(0, false, false);
+    this.levelInternalNavigation = false;
+    this.finishInternalNavigation = false;
+    this.updateLevelControls(false);
     this.closePopup && this.closePopup(undefined, moveFocus);
   }
 };

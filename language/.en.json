@@ -371,6 +371,343 @@
       ]
     },
     {
+      "label": "Level mode",
+      "description": "Restricts progression so each slide works as a level with exactly one scored activity.",
+      "fields": [
+        {
+          "label": "Enable level mode",
+          "description": "Disables free slide navigation and unlocks only the next level. The summary slide remains available at the end."
+        },
+        {
+          "label": "Progression criterion",
+          "options": [
+            {
+              "label": "Minimum percentage"
+            },
+            {
+              "label": "Minimum score"
+            },
+            {
+              "label": "Successful completion or maximum attempts"
+            }
+          ]
+        },
+        {
+          "label": "Minimum passing percentage"
+        },
+        {
+          "label": "Minimum passing score"
+        },
+        {
+          "label": "Maximum attempts",
+          "description": "The next level is unlocked when the activity reports success or this number of attempts is reached."
+        },
+        {
+          "label": "Advance after meeting the criterion",
+          "options": [
+            {
+              "label": "Automatically"
+            },
+            {
+              "label": "With a button"
+            }
+          ]
+        },
+        {
+          "label": "Automatic advance delay",
+          "description": "Time in milliseconds before advancing to the next level."
+        },
+        {
+          "label": "Next level button label",
+          "default": "Advance"
+        },
+        {
+          "label": "Final level button label",
+          "default": "Finish"
+        },
+        {
+          "label": "Button alignment",
+          "options": [
+            {
+              "label": "Center"
+            },
+            {
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "label": "Button bottom spacing",
+          "description": "Distance between the button and the bottom edge."
+        },
+        {
+          "label": "Advance button appearance",
+          "description": "Style for the Advance and Finish buttons. Border colors apply only when border is enabled.",
+          "fields": [
+            {
+              "label": "Use gradient background"
+            },
+            {
+              "label": "Button background color"
+            },
+            {
+              "label": "Gradient background",
+              "fields": [
+                {
+                  "label": "Gradient angle",
+                  "description": "Direction in degrees (0 = upward, 180 = downward)."
+                },
+                {
+                  "label": "Gradient start color"
+                },
+                {
+                  "label": "Gradient end color"
+                }
+              ]
+            },
+            {
+              "label": "Button text color"
+            },
+            {
+              "label": "Button hover background color"
+            },
+            {
+              "label": "Button hover text color"
+            },
+            {
+              "label": "Use button border"
+            },
+            {
+              "label": "Border settings",
+              "fields": [
+                {
+                  "label": "Button border color"
+                },
+                {
+                  "label": "Button hover border color"
+                }
+              ]
+            },
+            {
+              "label": "Button border radius",
+              "description": "Lower values are sharper; higher values are more rounded."
+            }
+          ]
+        },
+        {
+          "label": "Show level status messages",
+          "description": "Shows locked, completed and remaining attempts messages in the level controls."
+        },
+        {
+          "label": "Completed level message",
+          "default": "Next level"
+        },
+        {
+          "label": "Locked level message",
+          "default": "Complete the activity to unlock the next level."
+        },
+        {
+          "label": "Remaining attempts message",
+          "description": "Use @attempts for the number of remaining attempts.",
+          "default": "Attempts remaining: @attempts"
+        }
+      ]
+    },
+    {
+      "label": "Summary slide appearance",
+      "description": "Only affects the summary slide of this Course Presentation, not the embedded activities.",
+      "fields": [
+        {
+          "label": "Summary slide colors",
+          "fields": [
+            {
+              "label": "Summary slide background color"
+            },
+            {
+              "label": "Summary slide text color"
+            }
+          ]
+        },
+        {
+          "label": "Summary action buttons",
+          "description": "Shared style for the Show solutions, Retry and Export text buttons. Border colors apply only when border is enabled.",
+          "fields": [
+            {
+              "label": "Use gradient background"
+            },
+            {
+              "label": "Button background color"
+            },
+            {
+              "label": "Gradient background",
+              "fields": [
+                {
+                  "label": "Gradient angle",
+                  "description": "Direction in degrees (0 = upward, 180 = downward)."
+                },
+                {
+                  "label": "Gradient start color"
+                },
+                {
+                  "label": "Gradient end color"
+                }
+              ]
+            },
+            {
+              "label": "Button text color"
+            },
+            {
+              "label": "Button hover background color"
+            },
+            {
+              "label": "Button hover text color"
+            },
+            {
+              "label": "Use button border"
+            },
+            {
+              "label": "Border settings",
+              "fields": [
+                {
+                  "label": "Button border color"
+                },
+                {
+                  "label": "Button hover border color"
+                }
+              ]
+            },
+            {
+              "label": "Button border radius",
+              "description": "Default is 2em (Joubel UI). Lower values are sharper; higher values are more rounded."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Navigation appearance",
+      "description": "Style for the progress bar in normal (non-level) mode. Does not affect embedded activities.",
+      "fields": [
+        {
+          "label": "Navigation style",
+          "description": "Classic keeps the default Course Presentation bar. Dots replaces it with a compact point indicator.",
+          "options": [
+            {
+              "label": "Classic"
+            },
+            {
+              "label": "Dots"
+            }
+          ]
+        },
+        {
+          "label": "Override bar and footer background color",
+          "description": "Optional. When empty, the navigation bar and footer use the current slide background color."
+        },
+        {
+          "label": "Pending dot color"
+        },
+        {
+          "label": "Answered dot color"
+        },
+        {
+          "label": "Active dot color"
+        },
+        {
+          "label": "Dot size"
+        },
+        {
+          "label": "Bar width",
+          "description": "Width of the dots bar relative to the presentation."
+        },
+        {
+          "label": "Bar alignment",
+          "options": [
+            {
+              "label": "Left"
+            },
+            {
+              "label": "Center"
+            },
+            {
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "label": "Arrow icon color"
+        },
+        {
+          "label": "Arrow background color"
+        },
+        {
+          "label": "Arrow border radius"
+        },
+        {
+          "label": "Enable Finish button",
+          "description": "When enabled, the summary slide stays locked until every slide with a task has been answered. Prevents early completed statements. Default is off so free navigation is preserved."
+        },
+        {
+          "label": "Finish button label",
+          "default": "Finish"
+        },
+        {
+          "label": "Finish button appearance",
+          "description": "Style for the Finish button that unlocks the summary slide. Border colors apply only when border is enabled.",
+          "fields": [
+            {
+              "label": "Use gradient background"
+            },
+            {
+              "label": "Button background color"
+            },
+            {
+              "label": "Gradient background",
+              "fields": [
+                {
+                  "label": "Gradient angle",
+                  "description": "Direction in degrees (0 = upward, 180 = downward)."
+                },
+                {
+                  "label": "Gradient start color"
+                },
+                {
+                  "label": "Gradient end color"
+                }
+              ]
+            },
+            {
+              "label": "Button text color"
+            },
+            {
+              "label": "Button hover background color"
+            },
+            {
+              "label": "Button hover text color"
+            },
+            {
+              "label": "Use button border"
+            },
+            {
+              "label": "Border settings",
+              "fields": [
+                {
+                  "label": "Button border color"
+                },
+                {
+                  "label": "Button hover border color"
+                }
+              ]
+            },
+            {
+              "label": "Button border radius",
+              "description": "Default is 2em (Joubel UI). Lower values are sharper; higher values are more rounded."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "fields": [
         {
           "field": {
