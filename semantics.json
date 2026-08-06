@@ -1810,17 +1810,8 @@
         "name": "finishButtonEnabled",
         "type": "boolean",
         "label": "Enable Finish button",
-        "description": "When enabled, the summary slide stays locked until every slide with a task has been answered. Prevents early completed statements. Default is off so free navigation is preserved.",
-        "default": false,
-        "widget": "showWhen",
-        "showWhen": {
-          "rules": [
-            {
-              "field": "style",
-              "equals": "dots"
-            }
-          ]
-        }
+        "description": "Only applies when Navigation style is Dots. When enabled, the summary slide stays locked until every slide with a task has been answered. Default is off so free navigation is preserved.",
+        "default": false
       },
       {
         "name": "finishButtonLabel",
@@ -1829,7 +1820,12 @@
         "default": "Finish",
         "widget": "showWhen",
         "showWhen": {
+          "type": "and",
           "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            },
             {
               "field": "finishButtonEnabled",
               "equals": true
@@ -2014,7 +2010,12 @@
         ],
         "widget": "showWhen",
         "showWhen": {
+          "type": "and",
           "rules": [
+            {
+              "field": "style",
+              "equals": "dots"
+            },
             {
               "field": "finishButtonEnabled",
               "equals": true
@@ -2089,7 +2090,7 @@
                       "H5P.SingleChoiceSet 1.11",
                       "H5P.MultiChoice 1.16",
                       "H5P.TrueFalse 1.8",
-                      "H5P.DragQuestion 1.14",
+                      "H5P.DragQuestionCFRD 1.0",
                       "H5P.Summary 1.10",
                       "H5P.DragText 1.10",
                       "H5P.MarkTheWords 1.11",

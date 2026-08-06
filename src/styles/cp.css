@@ -480,6 +480,7 @@
 .h5p-course-presentation .h5p-dragtext-button,
 .h5p-course-presentation .h5p-markthewords-button,
 .h5p-course-presentation .h5p-dragquestion-button,
+.h5p-course-presentation .h5p-dragquestioncfrd-button,
 .h5p-course-presentation .h5p-summary-button,
 .h5p-course-presentation .h5p-dialogcards-button,
 .h5p-course-presentation .h5p-interactivevideo-button,
@@ -496,6 +497,7 @@
 .h5p-course-presentation .h5p-dragtext-button:hover,
 .h5p-course-presentation .h5p-markthewords-button:hover,
 .h5p-course-presentation .h5p-dragquestion-button:hover,
+.h5p-course-presentation .h5p-dragquestioncfrd-button:hover,
 .h5p-course-presentation .h5p-summary-button:hover,
 .h5p-course-presentation .h5p-dialogcards-button:hover,
 .h5p-course-presentation .h5p-interactivevideo-button:hover,
@@ -508,6 +510,7 @@
 .h5p-course-presentation .h5p-blanks-button:before,
 .h5p-course-presentation .h5p-multichoice-button:before,
 .h5p-course-presentation .h5p-dragquestion-button:before,
+.h5p-course-presentation .h5p-dragquestioncfrd-button:before,
 .h5p-course-presentation .h5p-summary-button:before,
 .h5p-course-presentation .h5p-singlechoiceset-button:before,
 .h5p-course-presentation .h5p-dragtext-button:before,
@@ -559,7 +562,8 @@
   content: "\e902";
 }
 
-.h5p-course-presentation .h5p-dragquestion-button:before {
+.h5p-course-presentation .h5p-dragquestion-button:before,
+.h5p-course-presentation .h5p-dragquestioncfrd-button:before {
   content: "\e991";
 }
 
@@ -855,7 +859,8 @@
 }
 
 /* Remove option for full enable full screen in Drag Question */
-.h5p-course-presentation .h5p-dragquestion-editor .field-name-enableFullScreen {
+.h5p-course-presentation .h5p-dragquestion-editor .field-name-enableFullScreen,
+.h5p-course-presentation .h5p-dragquestioncfrd-editor .field-name-enableFullScreen {
   display: none;
 }
 
