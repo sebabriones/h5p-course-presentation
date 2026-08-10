@@ -645,7 +645,7 @@
         },
         {
           "label": "Enable Finish button",
-          "description": "When enabled, the summary slide stays locked until every slide with a task has been answered. Prevents early completed statements. Default is off so free navigation is preserved."
+          "description": "When enabled, the summary slide stays locked until every task on every slide with a task has reported a top-level answered or completed statement. Nested questions inside a compound task do not unlock Finish. Default is off so free navigation is preserved."
         },
         {
           "label": "Finish button label",

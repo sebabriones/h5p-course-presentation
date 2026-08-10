@@ -1810,7 +1810,7 @@
         "name": "finishButtonEnabled",
         "type": "boolean",
         "label": "Enable Finish button",
-        "description": "Only applies when Navigation style is Dots. When enabled, the summary slide stays locked until every slide with a task has been answered. Default is off so free navigation is preserved.",
+        "description": "Only applies when Navigation style is Dots. When enabled, the summary slide stays locked until every task on every slide with a task has reported a top-level answered or completed statement. Nested questions inside a compound task do not unlock Finish. Default is off so free navigation is preserved.",
         "default": false
       },
       {
@@ -2087,7 +2087,7 @@
                       "H5P.Video 1.6",
                       "H5P.Audio 1.5",
                       "H5P.Blanks 1.14",
-                      "H5P.SingleChoiceSet 1.11",
+                      "H5P.SingleChoiceSetCFRD 1.0",
                       "H5P.MultiChoice 1.16",
                       "H5P.TrueFalse 1.8",
                       "H5P.DragQuestionCFRD 1.0",

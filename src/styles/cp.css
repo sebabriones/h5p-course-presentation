@@ -389,7 +389,8 @@
   max-width: 70%;
 }
 
-.h5p-popup-overlay.h5p-singlechoiceset .h5p-sc-sound-control {
+.h5p-popup-overlay.h5p-singlechoiceset .h5p-sc-sound-control,
+.h5p-popup-overlay.h5p-singlechoicesetcfrd .h5p-sc-sound-control {
   right: 1.2em;
 }
 .h5p-button-element.h5p-sc-set-wrapper {
@@ -477,6 +478,7 @@
 .h5p-course-presentation .h5p-blanks-button,
 .h5p-course-presentation .h5p-multichoice-button,
 .h5p-course-presentation .h5p-singlechoiceset-button,
+.h5p-course-presentation .h5p-singlechoicesetcfrd-button,
 .h5p-course-presentation .h5p-dragtext-button,
 .h5p-course-presentation .h5p-markthewords-button,
 .h5p-course-presentation .h5p-dragquestion-button,
@@ -494,6 +496,7 @@
 .h5p-course-presentation .h5p-blanks-button:hover,
 .h5p-course-presentation .h5p-multichoice-button:hover,
 .h5p-course-presentation .h5p-singlechoiceset-button:hover,
+.h5p-course-presentation .h5p-singlechoicesetcfrd-button:hover,
 .h5p-course-presentation .h5p-dragtext-button:hover,
 .h5p-course-presentation .h5p-markthewords-button:hover,
 .h5p-course-presentation .h5p-dragquestion-button:hover,
@@ -513,6 +516,7 @@
 .h5p-course-presentation .h5p-dragquestioncfrd-button:before,
 .h5p-course-presentation .h5p-summary-button:before,
 .h5p-course-presentation .h5p-singlechoiceset-button:before,
+.h5p-course-presentation .h5p-singlechoicesetcfrd-button:before,
 .h5p-course-presentation .h5p-dragtext-button:before,
 .h5p-course-presentation .h5p-dialogcards-button:before,
 .h5p-course-presentation .h5p-multimediachoice-button:before,
@@ -574,7 +578,8 @@
 .h5p-course-presentation .h5p-interactivevideo-button:before {
   content: "\f03d";
 }
-.h5p-course-presentation .h5p-singlechoiceset-button:before {
+.h5p-course-presentation .h5p-singlechoiceset-button:before,
+.h5p-course-presentation .h5p-singlechoicesetcfrd-button:before {
   content: "\e993";
 }
 .h5p-course-presentation .h5p-dragtext-button:before {

@@ -599,7 +599,7 @@
         },
         {
           "label": "Activar botón Terminar",
-          "description": "Cuando está activo, la diapositiva de resumen permanece bloqueada hasta que cada diapositiva con tarea haya sido respondida. Evita statements completed prematuros. Por omisión está desactivado para conservar la navegación libre."
+          "description": "Cuando está activo, la diapositiva de resumen permanece bloqueada hasta que cada tarea de cada diapositiva con tarea haya emitido un enunciado answered o completed de primer nivel. Las preguntas anidadas dentro de una tarea compuesta no desbloquean Terminar. Por omisión está desactivado para conservar la navegación libre."
         },
         {
           "label": "Etiqueta del botón Terminar",

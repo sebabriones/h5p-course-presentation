@@ -62,12 +62,12 @@ const NavigationLine = (function ($) {
               event.setVerb('answered');
             }
 
-            // Finish gate only trusts answered (and completed remapped below).
+            // Finish gate only trusts top-level answered/completed (not nested).
             if (
               this.cp.isFinishGateEnabled() &&
               (shortVerb === 'answered' || shortVerb === 'completed')
             ) {
-              this.cp.markFinishSlideAnswered(index);
+              this.cp.markFinishSlideAnswered(index, interaction, event);
             }
 
             if (event.data.statement.context.extensions === undefined) {

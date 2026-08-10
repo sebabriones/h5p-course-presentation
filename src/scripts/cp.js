@@ -105,13 +105,13 @@ let CoursePresentation = function (params, id, extras) {
     this.previousState.levelMode &&
     Array.isArray(this.previousState.levelMode.unlocked)
   ) ? this.previousState.levelMode.unlocked.slice() : [];
+  const previousFinish = this.previousState && this.previousState.navigationFinish
+    ? this.previousState.navigationFinish
+    : {};
   this.finishAnsweredSlides = new Set(
-    (
-      this.previousState &&
-      this.previousState.navigationFinish &&
-      Array.isArray(this.previousState.navigationFinish.answeredSlides)
-    ) ? this.previousState.navigationFinish.answeredSlides : []
+    Array.isArray(previousFinish.answeredSlides) ? previousFinish.answeredSlides : []
   );
+  this.finishAnsweredTasks = this.parseFinishAnsweredTasks(previousFinish.answeredTasks);
 
   this.currentSlideIndex = (this.previousState && this.previousState.progress) ? this.previousState.progress : 0;
 
@@ -390,13 +390,99 @@ CoursePresentation.prototype.areAllFinishSlidesAnswered = function () {
 };
 
 /**
- * Record a strict answered event for the Finish gate.
+ * Restore per-task Finish progress from previous state.
+ *
+ * @param {object} raw Map of slide index to task keys.
+ * @returns {Map<number, Set<string>>}
+ */
+CoursePresentation.prototype.parseFinishAnsweredTasks = function (raw) {
+  const map = new Map();
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return map;
+  }
+
+  Object.keys(raw).forEach((key) => {
+    const slideIndex = Number(key);
+    if (!Number.isInteger(slideIndex) || !Array.isArray(raw[key])) {
+      return;
+    }
+    map.set(slideIndex, new Set(raw[key].map(String)));
+  });
+
+  return map;
+};
+
+/**
+ * @returns {object}
+ */
+CoursePresentation.prototype.serializeFinishAnsweredTasks = function () {
+  const out = {};
+  this.finishAnsweredTasks.forEach((keys, slideIndex) => {
+    out[String(slideIndex)] = Array.from(keys);
+  });
+  return out;
+};
+
+/**
+ * Stable key for a slide task in the Finish gate.
+ *
+ * @param {object} interaction Task instance.
+ * @param {number} slideIndex Slide index.
+ * @returns {string}
+ */
+CoursePresentation.prototype.getFinishTaskKey = function (interaction, slideIndex) {
+  if (interaction && interaction.subContentId) {
+    return String(interaction.subContentId);
+  }
+
+  const tasks = this.slidesWithSolutions[slideIndex] || [];
+  const position = tasks.indexOf(interaction);
+  return position >= 0 ? 'index:' + position : 'unknown';
+};
+
+/**
+ * Whether every task on the slide has a top-level answered/completed statement.
  *
  * @param {number} slideIndex Slide index.
+ * @returns {boolean}
  */
-CoursePresentation.prototype.markFinishSlideAnswered = function (slideIndex) {
+CoursePresentation.prototype.areAllFinishTasksAnsweredOnSlide = function (slideIndex) {
+  const required = this.slidesWithSolutions[slideIndex] || [];
+  if (!required.length) {
+    return true;
+  }
+
+  const answered = this.finishAnsweredTasks.get(slideIndex) || new Set();
+  return required.every((task) => answered.has(this.getFinishTaskKey(task, slideIndex)));
+};
+
+/**
+ * Record a strict answered event for the Finish gate.
+ * Nested statements inside compound tasks (for example each Single Choice
+ * question) are ignored until the top-level task reports answered/completed.
+ *
+ * @param {number} slideIndex Slide index.
+ * @param {object} [interaction] Task instance that emitted the statement.
+ * @param {object} [event] xAPI event.
+ */
+CoursePresentation.prototype.markFinishSlideAnswered = function (slideIndex, interaction, event) {
   if (!this.isFinishGateEnabled() || slideIndex === undefined) {
     return;
+  }
+
+  if (interaction && event && !this.isDirectLevelStatement(interaction, event)) {
+    return;
+  }
+
+  if (interaction) {
+    if (!this.finishAnsweredTasks.has(slideIndex)) {
+      this.finishAnsweredTasks.set(slideIndex, new Set());
+    }
+    this.finishAnsweredTasks.get(slideIndex).add(this.getFinishTaskKey(interaction, slideIndex));
+
+    if (!this.areAllFinishTasksAnsweredOnSlide(slideIndex)) {
+      return;
+    }
   }
 
   this.finishAnsweredSlides.add(slideIndex);
@@ -410,6 +496,7 @@ CoursePresentation.prototype.markFinishSlideAnswered = function (slideIndex) {
  */
 CoursePresentation.prototype.resetFinishGate = function () {
   this.finishAnsweredSlides.clear();
+  this.finishAnsweredTasks.clear();
   if (this.navigationLine && isFunction(this.navigationLine.updateFinishButton)) {
     this.navigationLine.updateFinishButton();
   }
@@ -976,7 +1063,8 @@ CoursePresentation.prototype.getCurrentState = function () {
 
   if (this.isFinishGateEnabled()) {
     state.navigationFinish = {
-      answeredSlides: Array.from(this.finishAnsweredSlides)
+      answeredSlides: Array.from(this.finishAnsweredSlides),
+      answeredTasks: this.serializeFinishAnsweredTasks()
     };
   }
 
