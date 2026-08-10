@@ -2087,6 +2087,7 @@
                       "H5P.Video 1.6",
                       "H5P.Audio 1.5",
                       "H5P.Blanks 1.14",
+                      "H5P.AdvancedBlanksCFRD 1.0",
                       "H5P.SingleChoiceSetCFRD 1.0",
                       "H5P.MultiChoice 1.16",
                       "H5P.TrueFalse 1.8",
