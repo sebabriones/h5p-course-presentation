@@ -14,6 +14,54 @@ import { applyButtonAppearance } from './button-appearance';
  */
 const KEYWORD_TITLE_SKIP = null;
 
+/**
+ * Primer load: reintentar setActivityStarted con delays reales hasta Integration.contents['cid-…'].
+ * Solo marca ensured cuando Integration está lista.
+ */
+function ensureActivityStarted(instance) {
+  if (!instance || instance._cfrdActivityStartEnsured || instance._cfrdEnsuringActivityStart) {
+    return;
+  }
+
+  instance._cfrdEnsuringActivityStart = true;
+  const delays = [0, 16, 50, 100, 250, 500];
+  let delayIndex = 0;
+
+  const isIntegrationReady = () => {
+    const cid = instance.contentId;
+    return cid != null &&
+      typeof H5PIntegration !== 'undefined' &&
+      H5PIntegration.contents &&
+      H5PIntegration.contents['cid-' + cid];
+  };
+
+  const attempt = () => {
+    delete instance.activityStartTime;
+    if (typeof instance.setActivityStarted === 'function') {
+      instance.setActivityStarted();
+    }
+    else if (typeof instance.triggerXAPI === 'function') {
+      instance.triggerXAPI('attempted');
+      instance.activityStartTime = Date.now();
+    }
+
+    if (isIntegrationReady()) {
+      instance._cfrdEnsuringActivityStart = false;
+      instance._cfrdActivityStartEnsured = true;
+      return;
+    }
+
+    if (delayIndex >= delays.length) {
+      instance._cfrdEnsuringActivityStart = false;
+      return;
+    }
+
+    setTimeout(attempt, delays[delayIndex++]);
+  };
+
+  attempt();
+}
+
 const LEVEL_MODE_DEFAULTS = {
   enabled: false,
   criterion: 'percentage',
@@ -1113,7 +1161,7 @@ CoursePresentation.prototype.attach = function ($container) {
 
   // isRoot is undefined in the editor
   if (this.isRoot !== undefined && this.isRoot()) {
-    this.setActivityStarted();
+    ensureActivityStarted(this);
   }
 
   var html =
@@ -3031,6 +3079,12 @@ CoursePresentation.prototype.resetTask = function (moveFocus = false) {
     this.finishInternalNavigation = false;
     this.updateLevelControls(false);
     this.closePopup && this.closePopup(undefined, moveFocus);
+  }
+
+  // Nuevo intento del contenedor: sin delete, setActivityStarted es no-op.
+  delete this.activityStartTime;
+  if (typeof this.setActivityStarted === 'function') {
+    this.setActivityStarted();
   }
 };
 
