@@ -3,14 +3,14 @@
   "contentType": "Library",
   "majorVersion": 1,
   "minorVersion": 0,
-  "patchVersion": 19,
+  "patchVersion": 20,
   "runnable": 1,
   "fullscreen": 1,
   "embedTypes": [
     "iframe"
   ],
   "machineName": "H5P.CoursePresentationCFRD",
-  "author": "CFRD-UDEC",
+  "author": "sbriones (CFRD-UDEC)",
   "license": "MIT",
   "coreApi": {
     "majorVersion": 1,
