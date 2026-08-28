@@ -48,7 +48,7 @@
   height: 100%;
   justify-content: var(--h5p-cp-level-justify, center);
   min-width: 0;
-  padding: 0 1em var(--h5p-cp-level-bottom-spacing, 0.75em);
+  padding: 0 1em;
   position: relative;
   z-index: 3;
 }
@@ -141,6 +141,17 @@
 .h5p-course-presentation.h5p-course-presentation-level-mode .h5p-level-controls {
   flex: 1 1 0;
   min-width: 0;
+}
+
+/* The button is taller than the 6.5% footer strip, so keeping it in flow either
+ * pins it to the bottom edge or clips it. Anchor it to the footer bottom and let
+ * it grow upwards over the slide, leaving room for fullscreen/print on the right. */
+.h5p-course-presentation.h5p-course-presentation-level-mode .h5p-level-controls {
+  bottom: var(--h5p-cp-level-bottom-spacing, 0.75em);
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 4em;
 }
 
 .h5p-course-presentation.h5p-course-presentation-level-mode .h5p-footer .h5p-footer-right-adjusted {

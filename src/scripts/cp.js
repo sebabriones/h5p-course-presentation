@@ -366,6 +366,26 @@ CoursePresentation.prototype.isLevelModeEnabled = function () {
 };
 
 /**
+ * Fill color of a slide as seen by the learner.
+ *
+ * The summary slide is not an authored slide, so its color comes from the
+ * summary appearance instead of the slide background selector.
+ *
+ * @param {number} [slideIndex]
+ * @returns {string} CSS color or empty string.
+ */
+CoursePresentation.prototype.getSlideChromeBackgroundColor = function (slideIndex) {
+  const index = (slideIndex === undefined) ? this.currentSlideIndex : slideIndex;
+
+  if (this.showSummarySlide && index === this.slides.length - 1) {
+    const summarySlide = this.summaryAppearance.slide || {};
+    return summarySlide.backgroundColor || '';
+  }
+
+  return this.getLevelBackgroundColor(index) || '';
+};
+
+/**
  * Background color for the dots chrome (nav + footer).
  * Uses the authored override when set; otherwise the slide fill color.
  *
@@ -378,8 +398,7 @@ CoursePresentation.prototype.getDotsChromeBackgroundColor = function (slideIndex
     return override;
   }
 
-  const index = (slideIndex === undefined) ? this.currentSlideIndex : slideIndex;
-  return this.getLevelBackgroundColor(index) || '#f5f5f5';
+  return this.getSlideChromeBackgroundColor(slideIndex) || '#f5f5f5';
 };
 
 /**
@@ -998,15 +1017,15 @@ CoursePresentation.prototype.updateLevelControls = function (unlocked) {
   const isSummarySlide = this.showSummarySlide &&
     this.currentSlideIndex === this.slides.length - 1;
   this.$levelControls.toggle(!isSummarySlide);
-  if (isSummarySlide) {
-    this.$footer.css('background-color', '');
-    return;
-  }
 
   this.$footer.css(
     'background-color',
-    this.getLevelBackgroundColor(this.currentSlideIndex)
+    this.getSlideChromeBackgroundColor(this.currentSlideIndex)
   );
+
+  if (isSummarySlide) {
+    return;
+  }
 
   const isLastLevel = this.showSummarySlide &&
     this.currentSlideIndex === this.slides.length - 2;

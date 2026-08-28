@@ -96,8 +96,10 @@
 
 /* ------------------------------- Summary table style -----------------------------------  */
 .h5p-course-presentation .h5p-summary-table-holder {
-  height: calc(100% - 4.5em);
-  margin: 1em;
+  /* The instructions tab floats over the top edge of the slide, so the table
+     header needs extra clearance to avoid ending up underneath it. */
+  height: calc(100% - 4.5em - var(--h5p-cp-summary-table-top-gap, 1.5em));
+  margin: calc(1em + var(--h5p-cp-summary-table-top-gap, 1.5em)) 1em 1em;
 }
 
 .h5p-course-presentation .h5p-summary-table-pages {

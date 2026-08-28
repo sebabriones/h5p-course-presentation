@@ -575,9 +575,38 @@ const NavigationLine = (function ($) {
     }
 
     this.toggleNextAndPreviousButtonDisabled(slideNumber);
+    this.updateFooterBackground(slideNumber);
 
     // Update keyword in footer
     this.updateFooterKeyword(slideNumber);
+  };
+
+  /**
+   * Match the footer to the slide currently on screen.
+   *
+   * Solution mode keeps its own dark chrome, the dots style is handled by
+   * updateDotsChromeBackground so the nav bar stays in sync with it, and level
+   * mode paints the footer from updateLevelControls.
+   *
+   * @param {Number} slideNumber Current slide number
+   */
+  NavigationLine.prototype.updateFooterBackground = function (slideNumber) {
+    if (!this.cp.$footer || !this.cp.$footer.length) {
+      return;
+    }
+
+    if (
+      this.cp.isSolutionMode ||
+      this.cp.isDotsNavigationEnabled() ||
+      this.cp.isLevelModeEnabled()
+    ) {
+      return;
+    }
+
+    this.cp.$footer.css(
+      'background-color',
+      this.cp.getSlideChromeBackgroundColor(slideNumber) || ''
+    );
   };
 
   /**
