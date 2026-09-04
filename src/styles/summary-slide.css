@@ -254,7 +254,7 @@
 }
 
 .h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:hover,
-.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:focus,
+.h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:focus-visible,
 .h5p-course-presentation .h5p-summary-footer.h5p-cp-buttons-custom .h5p-joubelui-button:active {
   background: var(--h5p-cp-btn-hover-bg);
   border-color: var(--h5p-cp-btn-hover-border-color);

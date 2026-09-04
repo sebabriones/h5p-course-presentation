@@ -95,7 +95,7 @@
 }
 
 .h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button:hover,
-.h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button:focus {
+.h5p-course-presentation .h5p-level-controls.h5p-cp-buttons-custom .h5p-level-advance-button:focus-visible {
   background: var(--h5p-cp-btn-hover-bg);
   border-color: var(--h5p-cp-btn-hover-border-color);
   color: var(--h5p-cp-btn-hover-text);
@@ -645,7 +645,7 @@
 }
 
 .h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn:hover,
-.h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn:focus {
+.h5p-course-presentation-dots-nav .h5p-finish-btn-container.h5p-cp-buttons-custom .h5p-finish-btn:focus-visible {
   background: var(--h5p-cp-btn-hover-bg);
   border-color: var(--h5p-cp-btn-hover-border-color);
   color: var(--h5p-cp-btn-hover-text);
