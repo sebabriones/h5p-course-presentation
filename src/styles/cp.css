@@ -68,6 +68,31 @@
   margin-bottom: 0;
 }
 
+/* Instructions markup must not inherit slide typography (extra padding/margins cause early scroll). */
+.h5p-course-presentation .h5p-instructions-root h1,
+.h5p-course-presentation .h5p-instructions-root h2,
+.h5p-course-presentation .h5p-instructions-root h3,
+.h5p-course-presentation .h5p-instructions-root h4,
+.h5p-course-presentation .h5p-instructions-root h5,
+.h5p-course-presentation .h5p-instructions-root h6,
+.h5p-course-presentation .h5p-instructions-root p {
+  margin: 0 0 0.75em;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.h5p-course-presentation .h5p-instructions-root h1:last-child,
+.h5p-course-presentation .h5p-instructions-root h2:last-child,
+.h5p-course-presentation .h5p-instructions-root h3:last-child,
+.h5p-course-presentation .h5p-instructions-root h4:last-child,
+.h5p-course-presentation .h5p-instructions-root h5:last-child,
+.h5p-course-presentation .h5p-instructions-root h6:last-child,
+.h5p-course-presentation .h5p-instructions-root p:last-child {
+  margin-bottom: 0;
+}
+
 .h5p-course-presentation a:focus {
   box-shadow: none;
 }
